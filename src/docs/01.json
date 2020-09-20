@@ -1,0 +1,63 @@
+{
+  "version": "3",
+  "id": "d107b41d-9687-43a0-9687-ea1ef567dbce",
+  "name": "unbekannt",
+  "parts": [
+    {
+      "id": "f745987b-351d-4530-945d-1e9586017fef",
+      "length": 91489341,
+      "color": "#4582b4",
+      "name": "Intro"
+    },
+    {
+      "id": "b9936c38-c771-4210-8ea7-37747fbd3a7c",
+      "length": 115957787,
+      "color": "#ffd700",
+      "name": "Verse"
+    },
+    {
+      "id": "b91f04c6-e62b-41c1-90e2-b23f13187747",
+      "length": 112765298,
+      "color": "#228b22",
+      "name": "Chorus"
+    },
+    {
+      "id": "25bcfc1c-7c79-4d90-a3ef-0da09004e80d",
+      "length": 94682021,
+      "color": "#ffd700",
+      "name": "Verse"
+    },
+    {
+      "id": "bc9df715-0512-46de-86f4-6c943963183c",
+      "length": 102127021,
+      "color": "#228b22",
+      "name": "Chorus"
+    },
+    {
+      "id": "d525caf5-4edc-4407-9312-ba7aebcdd07c",
+      "length": 177659000,
+      "color": "#ff0000",
+      "name": "Bridge"
+    },
+    {
+      "id": "9d728c88-d682-456d-81ec-82cb8833d0ef",
+      "length": 102128277,
+      "color": "#228b22",
+      "name": "Chorus"
+    },
+    {
+      "id": "98202b25-f4a1-410a-b2be-d4dcb45c2c7a",
+      "length": 118084872,
+      "color": "#228b22",
+      "name": "Chorus"
+    },
+    {
+      "id": "f8f11811-bc2c-4ab3-8af9-07f8ebaf4f2f",
+      "length": 85106383,
+      "color": "#4582b4",
+      "name": "Outro"
+    }
+  ],
+  "annotations": [],
+  "sounds": []
+}
