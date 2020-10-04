@@ -1,9 +1,9 @@
 import Work from './work';
 import classnames from 'classnames';
 import uiSettings from './ui-settings';
-import Dimensions from 'react-dimensions';
+import React, { useEffect } from 'react';
 import findupAttribute from 'findup-attribute';
-import React, { useRef, useEffect } from 'react';
+import useDimensions from 'react-cool-dimensions';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
 import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
 
@@ -26,27 +26,28 @@ function findPossibleAction(event) {
   }
 }
 
-export default Dimensions()(function Workspace({ works, selection, mouseInfo, workspaceInfo, dispatch, containerWidth, containerHeight }) {
-  const workspaceRef = useRef();
-  console.log(containerWidth);
+export default function Workspace({ works, selection, mouseInfo, workspaceInfo, dispatch }) {
+  const { ref: workspaceRef, width: workspaceWidth } = useDimensions({ useBorderBoxSize: true });
 
   useEffect(() => {
     dispatch({
       type: SET_WORKSPACE_INFO,
       info: {
-        avuFactor: getAvuFactorFromWorkspaceWidth(containerWidth, uiSettings.workStripHorizontalMargin, uiSettings.workspaceSideBarWidth)
+        workspaceWidth: workspaceWidth,
+        avuFactor: getAvuFactorFromWorkspaceWidth(workspaceWidth, uiSettings.workStripHorizontalMargin, uiSettings.workspaceSideBarWidth),
       }
     });
-  }, [dispatch, containerWidth]);
+  }, [dispatch, workspaceWidth]);
 
   const handleMouseEnterOrMove = event => {
+    const clientRect = workspaceRef.current.getBoundingClientRect();
     dispatch({
       type: SET_MOUSE_INFO,
       info: {
         ...mouseInfo,
         lastWorkspacePosition: {
-          x: event.clientX - workspaceRef.current.left,
-          y: event.clientY - workspaceRef.current.top
+          x: event.clientX - clientRect.left,
+          y: event.clientY - clientRect.top
         },
         possibleAction: mouseInfo.currentAction ? null : findPossibleAction(event)
       }
@@ -54,13 +55,14 @@ export default Dimensions()(function Workspace({ works, selection, mouseInfo, wo
   };
 
   const handleMouseLeave = event => {
+    const clientRect = workspaceRef.current.getBoundingClientRect();
     dispatch({
       type: SET_MOUSE_INFO,
       info: {
         ...mouseInfo,
         lastWorkspacePosition: {
-          x: event.clientX - workspaceRef.current.left,
-          y: event.clientY - workspaceRef.current.top
+          x: event.clientX - clientRect.left,
+          y: event.clientY - clientRect.top
         },
         possibleAction: null,
         currentAction: null
@@ -106,7 +108,7 @@ export default Dimensions()(function Workspace({ works, selection, mouseInfo, wo
   }
 
   return (
-    <div ref={workspaceRef} className={classes} style={{ position: 'relative', width: '100%', height: '100%' }} data-possible-action={DESELECT_ALL} onMouseEnter={handleMouseEnterOrMove} onMouseMove={handleMouseEnterOrMove} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
+    <div ref={workspaceRef} className={classes} style={{ position: 'relative' }} data-possible-action={DESELECT_ALL} onMouseEnter={handleMouseEnterOrMove} onMouseMove={handleMouseEnterOrMove} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
       <div className="Workspace-workLayer" style={{ padding: `${uiSettings.workStripVerticalMargin}px ${uiSettings.workStripHorizontalMargin}px` }}>
         <Work work={works[0]} />
       </div>
@@ -117,4 +119,4 @@ export default Dimensions()(function Workspace({ works, selection, mouseInfo, wo
       </div>
     </div>
   );
-});
+}

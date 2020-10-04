@@ -18,6 +18,7 @@ export const initialState = {
     currentAction: null
   },
   workspaceInfo: {
+    workspaceWidth: 0,
     avuFactor: 0
   }
 };
@@ -112,16 +113,9 @@ export function reducer(state, action) {
         mouseInfo: action.info
       }
     case SET_WORKSPACE_INFO:
-      console.log(SET_WORKSPACE_INFO);
       return {
         ...state,
         workspaceInfo: action.info
-      }
-    case 'debug':
-      console.log(SET_WORKSPACE_INFO);
-      return {
-        ...state,
-        debugInfo: action.info
       }
     default:
       throw new Error('HÄ?');
