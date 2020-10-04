@@ -2,9 +2,9 @@ import Work from './work';
 import classnames from 'classnames';
 import React, { useRef } from 'react';
 import uiSettings from './ui-settings';
-import { SELECT_PART } from './actions';
 import findupAttribute from 'findup-attribute';
 import { getAvuFactorFromWorkspaceWidth } from './avu-helper';
+import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO } from './actions';
 
 function findPossibleAction(event) {
   const element = findupAttribute(event.target, 'data-possible-action') || null;
@@ -15,6 +15,10 @@ function findPossibleAction(event) {
         action: SELECT_PART,
         workId: element.getAttribute('data-parent-work-id'),
         partId: element.getAttribute('data-part-id')
+      };
+    case DESELECT_ALL:
+      return {
+        action: DESELECT_ALL
       };
     default:
       return null;
@@ -27,7 +31,7 @@ export default function Workspace({ works, selection, mouseInfo, dispatch }) {
   const handleMouseEnterOrMove = event => {
     const workspaceRect = workspaceRef.current.getBoundingClientRect();
     dispatch({
-      type: 'set-mouse-info',
+      type: SET_MOUSE_INFO,
       info: {
         ...mouseInfo,
         lastWorkspacePosition: {
@@ -43,7 +47,7 @@ export default function Workspace({ works, selection, mouseInfo, dispatch }) {
   const handleMouseLeave = event => {
     const workspaceRect = workspaceRef.current.getBoundingClientRect();
     dispatch({
-      type: 'set-mouse-info',
+      type: SET_MOUSE_INFO,
       info: {
         ...mouseInfo,
         lastWorkspacePosition: {
@@ -64,7 +68,10 @@ export default function Workspace({ works, selection, mouseInfo, dispatch }) {
 
     switch (mouseInfo.possibleAction.action) {
       case SELECT_PART:
-        dispatch({ type: 'select-part', workId: mouseInfo.possibleAction.workId, partId: mouseInfo.possibleAction.partId });
+        dispatch({ type: SELECT_PART, workId: mouseInfo.possibleAction.workId, partId: mouseInfo.possibleAction.partId });
+        break;
+      case DESELECT_ALL:
+        dispatch({ type: DESELECT_ALL });
         break;
       default:
         throw new Error('HÄ?');
@@ -87,7 +94,7 @@ export default function Workspace({ works, selection, mouseInfo, dispatch }) {
   }
 
   return (
-    <div ref={workspaceRef} className={classes} style={{ position: 'relative' }} onMouseEnter={handleMouseEnterOrMove} onMouseMove={handleMouseEnterOrMove} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
+    <div ref={workspaceRef} className={classes} style={{ position: 'relative' }} data-possible-action={DESELECT_ALL} onMouseEnter={handleMouseEnterOrMove} onMouseMove={handleMouseEnterOrMove} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
       <div className="Workspace-workLayer" style={{ padding: `${uiSettings.workStripVerticalMargin}px ${uiSettings.workStripHorizontalMargin}px` }}>
         <Work work={works[0]} />
       </div>
