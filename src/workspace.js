@@ -68,7 +68,7 @@ export default function Workspace({ works, selection, mouseInfo, dispatch }) {
 
     switch (mouseInfo.possibleAction.action) {
       case SELECT_PART:
-        dispatch({ type: SELECT_PART, workId: mouseInfo.possibleAction.workId, partId: mouseInfo.possibleAction.partId });
+        dispatch({ type: SELECT_PART, workId: mouseInfo.possibleAction.workId, partId: mouseInfo.possibleAction.partId, ctrlKey: event.ctrlKey });
         break;
       case DESELECT_ALL:
         dispatch({ type: DESELECT_ALL });
@@ -80,17 +80,15 @@ export default function Workspace({ works, selection, mouseInfo, dispatch }) {
 
   const classes = classnames(['Workspace', mouseInfo.possibleAction ? `u-${mouseInfo.possibleAction.action}` : null]);
 
-  let selectionRect;
-  if (selection.partIds.length) {
-    const partElement = workspaceRef.current.querySelector(`[data-part-id="${selection.partIds[0]}"]`); // TODO MULTI-SELECT!
-    selectionRect = {
+  const selectionRects = [];
+  for (let partId of selection.partIds) {
+    const partElement = workspaceRef.current.querySelector(`[data-part-id="${partId}"]`); // TODO MULTI-SELECT!
+    selectionRects.push({
       top: partElement.offsetTop - uiSettings.selectionRectanglePadding,
       left: partElement.offsetLeft - uiSettings.selectionRectanglePadding,
       width: partElement.offsetWidth + (2 * uiSettings.selectionRectanglePadding),
       height: partElement.offsetHeight + (2 * uiSettings.selectionRectanglePadding)
-    }
-  } else {
-    selectionRect = null;
+    });
   }
 
   return (
@@ -99,7 +97,9 @@ export default function Workspace({ works, selection, mouseInfo, dispatch }) {
         <Work work={works[0]} />
       </div>
       <div className="Workspace-decoratorLayer" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none' }}>
-        {selectionRect && <div style={{ position: 'absolute', border: '1px solid #fa8c16', backgroundColor: '#ffa940', opacity: '0.4', ...selectionRect }} />}
+        {selectionRects.map((rect, index) => (
+          <div key={index} style={{ position: 'absolute', border: '1px solid #fa8c16', backgroundColor: '#ffa940', opacity: '0.4', ...rect }} />
+        ))}
       </div>
     </div>
   );
