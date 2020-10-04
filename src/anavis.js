@@ -16,7 +16,13 @@ export default function Anavis() {
           </pre>
         </div>
         <div style={{ display: 'grid', gridRow: 1, gridColumn: 3, border: '1px solid gray', backgroundColor: '#fff' }}>
-          <Workspace works={state.works} selection={state.selection} mouseInfo={state.mouseInfo} dispatch={dispatch} />
+          <Workspace
+            works={state.works}
+            selection={state.selection}
+            mouseInfo={state.mouseInfo}
+            workspaceInfo={state.workspaceInfo}
+            dispatch={dispatch}
+            />
         </div>
       </div>
     </React.StrictMode>

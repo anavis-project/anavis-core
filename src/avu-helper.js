@@ -4,3 +4,7 @@ export function getAvuFactorFromWorkspaceWidth(workspaceWidth, horizontalMargin,
   const ignoredSpace = (2 * horizontalMargin) + sideBarWidth;
   return (workspaceWidth - ignoredSpace) / MAX_AVUS;
 }
+
+export function avu2Px(avus, avuFactor) {
+  return avus * avuFactor;
+}

@@ -1,5 +1,5 @@
 import testDoc01 from './docs/01.json';
-import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO } from './actions';
+import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
 
 export const initialState = {
   works: [testDoc01],
@@ -7,16 +7,18 @@ export const initialState = {
     workId: null,
     partIds: [],
     partIndices: [],
-    partIndexChunks: []
+    chunks: []
   },
   mouseInfo: {
     lastWorkspacePosition: {
       x: 0,
       y: 0
     },
-    avuFactor: 0,
     possibleAction : null,
     currentAction: null
+  },
+  workspaceInfo: {
+    avuFactor: 0
   }
 };
 
@@ -42,22 +44,42 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey }
     return indices;
   }, []);
 
-  let chunks = partIndices.length ? [{ from: partIndices[0], to: partIndices[0] }] : [];
+  let chunks = partIndices.length ? [{ fromPartIndex: partIndices[0], toPartIndex: partIndices[0] }] : [];
   for (let i = 1; i < partIndices.length; i += 1) {
     const lastChunk = chunks[chunks.length - 1];
     const currentIndex = partIndices[i];
-    if (currentIndex - lastChunk.to === 1) {
-      lastChunk.to = currentIndex;
+    if (currentIndex - lastChunk.toPartIndex === 1) {
+      lastChunk.toPartIndex = currentIndex;
     } else {
-      chunks.push({ from: currentIndex, to: currentIndex });
+      chunks.push({ fromPartIndex: currentIndex, toPartIndex: currentIndex });
     }
+  }
+
+  let currentAvu = 0;
+  for (let i = 0; i < work.parts.length; i += 1) {
+    const part = work.parts[i];
+    const startAvu = currentAvu;
+    const endAvu = startAvu + part.length;
+
+    for (let chunk of chunks) {
+      if (chunk.fromPartIndex === i) {
+        chunk.fromAvu = startAvu;
+      }
+
+      if (chunk.toPartIndex === i) {
+        chunk.toAvu = endAvu;
+        chunk.widthInAvus = chunk.toAvu - chunk.fromAvu;
+      }
+    }
+
+    currentAvu = endAvu;
   }
 
   return {
     workId: newSelectedWorkId,
     partIds: newSelectedPartIds,
     partIndices: partIndices,
-    partIndexChunks: chunks
+    chunks: chunks
   };
 }
 
@@ -81,13 +103,25 @@ export function reducer(state, action) {
           workId: null,
           partIds: [],
           partIndices: [],
-          partIndexChunks: []
+          chunks: []
         }
       };
     case SET_MOUSE_INFO:
       return {
         ...state,
         mouseInfo: action.info
+      }
+    case SET_WORKSPACE_INFO:
+      console.log(SET_WORKSPACE_INFO);
+      return {
+        ...state,
+        workspaceInfo: action.info
+      }
+    case 'debug':
+      console.log(SET_WORKSPACE_INFO);
+      return {
+        ...state,
+        debugInfo: action.info
       }
     default:
       throw new Error('HÄ?');
