@@ -26,7 +26,7 @@ function findPossibleAction(event) {
   }
 }
 
-export default function Workspace({ works, selection, mouseInfo, workspaceInfo, dispatch }) {
+export default function Workspace({ works, selection, mouseInfo, workspaceInfo, options, dispatch }) {
   const { ref: workspaceRef, width: workspaceWidth } = useDimensions({ useBorderBoxSize: true });
 
   useEffect(() => {
@@ -34,10 +34,10 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       type: SET_WORKSPACE_INFO,
       info: {
         workspaceWidth: workspaceWidth,
-        avuFactor: getAvuFactorFromWorkspaceWidth(workspaceWidth, uiSettings.workStripHorizontalMargin, uiSettings.workspaceSideBarWidth),
+        avuFactor: getAvuFactorFromWorkspaceWidth(workspaceWidth, options.workStripHorizontalMargin, uiSettings.workspaceSideBarWidth),
       }
     });
-  }, [dispatch, workspaceWidth]);
+  }, [dispatch, workspaceWidth, options]);
 
   const handleMouseEnterOrMove = event => {
     const clientRect = workspaceRef.current.getBoundingClientRect();
@@ -109,8 +109,8 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
 
   return (
     <div ref={workspaceRef} className={classes} style={{ position: 'relative' }} data-possible-action={DESELECT_ALL} onMouseEnter={handleMouseEnterOrMove} onMouseMove={handleMouseEnterOrMove} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
-      <div className="Workspace-workLayer" style={{ padding: `${uiSettings.workStripVerticalMargin}px ${uiSettings.workStripHorizontalMargin}px` }}>
-        {works.map(work => <Work key={work.id} work={work} />)}
+      <div className="Workspace-workLayer" style={{ padding: `${options.workStripVerticalMargin}px ${options.workStripHorizontalMargin}px` }}>
+        {works.map(work => <Work key={work.id} work={work} partHeight={options.partHeight} />)}
       </div>
       <div className="Workspace-decoratorLayer" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none' }}>
         {selectionRects.map((rect, index) => (

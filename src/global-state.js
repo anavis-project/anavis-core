@@ -1,7 +1,7 @@
 import testDoc01 from './docs/01.json';
 import testDoc02 from './docs/02.json';
 import testDoc03 from './docs/03.json';
-import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
+import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
 
 export const initialState = {
   works: [testDoc01, testDoc02, testDoc03],
@@ -22,6 +22,11 @@ export const initialState = {
   workspaceInfo: {
     workspaceWidth: 0,
     avuFactor: 0
+  },
+  options: {
+    partHeight: 50,
+    workStripHorizontalMargin: 50,
+    workStripVerticalMargin: 50
   }
 };
 
@@ -121,7 +126,15 @@ export function reducer(state, action) {
         ...state,
         workspaceInfo: action.info
       }
+    case SET_OPTIONS:
+      return {
+        ...state,
+        options: {
+          ...state.options,
+          ...action.options
+        }
+      }
     default:
-      throw new Error('HÄ?');
+      throw new Error(`Action type ${action.type} is not implemented!`);
   }
 }

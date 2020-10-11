@@ -1,13 +1,18 @@
 import Workspace from './workspace';
-import React, { useReducer } from 'react';
+import { SET_OPTIONS } from './actions';
+import React, { useReducer, useEffect } from 'react';
 import { initialState, reducer } from './global-state';
 
-export default function Anavis() {
+export default function Anavis({ options }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    dispatch({ type: SET_OPTIONS, options: options });
+  }, [options, dispatch]);
 
   return (
     <React.StrictMode>
-      <div style={{ display: 'grid', margin: '100px auto', width: '90vw', height: '90vh', gridTemplateRows: '1fr', gridTemplateColumns: '400px 50px 1fr' }}>
+      <div style={{ display: 'grid', margin: '100px auto', width: '90vw', height: '80vh', gridTemplateRows: '1fr', gridTemplateColumns: '400px 50px 1fr' }}>
         <div style={{ overflow: 'scroll', display: 'grid', gridRow: 1, gridColumn: 1, border: '1px solid gray', backgroundColor: '#fff', fontSize: '9px' }}>
           <pre>
             <code>
@@ -21,6 +26,7 @@ export default function Anavis() {
             selection={state.selection}
             mouseInfo={state.mouseInfo}
             workspaceInfo={state.workspaceInfo}
+            options={state.options}
             dispatch={dispatch}
             />
         </div>
