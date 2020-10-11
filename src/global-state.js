@@ -1,8 +1,10 @@
 import testDoc01 from './docs/01.json';
+import testDoc02 from './docs/02.json';
+import testDoc03 from './docs/03.json';
 import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
 
 export const initialState = {
-  works: [testDoc01],
+  works: [testDoc01, testDoc02, testDoc03],
   selection: {
     workId: null,
     partIds: [],
@@ -24,12 +26,14 @@ export const initialState = {
 };
 
 function createNewSelection({ works, currentSelection, workId, partId, ctrlKey }) {
-  const isSelected = currentSelection.partIds.includes(partId);
-  const isOneOfMultiple = isSelected && currentSelection.partIds.length > 1;
+  // If the currently selected parts come from the same work, we keep them, otherwise, we start with an empty list:
+  const alreadySelectedPartIds = (currentSelection.workId === workId) ? currentSelection.partIds : [];
+  const isSelected = alreadySelectedPartIds.includes(partId);
+  const isOneOfMultiple = isSelected && alreadySelectedPartIds.length > 1;
   const isAddOrSubtract = ctrlKey;
   let newSelectedPartIds;
   if (isAddOrSubtract) {
-    newSelectedPartIds = isSelected ? currentSelection.partIds.filter(x => x !== partId) : currentSelection.partIds.concat([partId]);
+    newSelectedPartIds = isSelected ? alreadySelectedPartIds.filter(x => x !== partId) : alreadySelectedPartIds.concat([partId]);
   } else if (isOneOfMultiple) {
     newSelectedPartIds = [partId];
   } else {

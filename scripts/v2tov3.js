@@ -7,7 +7,7 @@ const MAX_AVUS = 1000000000;
 
 (async () => {
 
-  const fileName = path.join(__dirname, '../src/docs/01.json');
+  const fileName = path.join(__dirname, '../src/docs/03.json');
   const content = JSON.parse(await fs.readFile(fileName, 'utf8'));
   v2tov3(content);
   await fs.writeFile(fileName, JSON.stringify(content, null, 2) + EOL, 'utf8');

@@ -8,7 +8,7 @@ export default function Anavis() {
   return (
     <React.StrictMode>
       <div style={{ display: 'grid', margin: '100px auto', width: '90vw', height: '90vh', gridTemplateRows: '1fr', gridTemplateColumns: '400px 50px 1fr' }}>
-        <div style={{ display: 'grid', gridRow: 1, gridColumn: 1, border: '1px solid gray', backgroundColor: '#fff', fontSize: '9px' }}>
+        <div style={{ overflow: 'scroll', display: 'grid', gridRow: 1, gridColumn: 1, border: '1px solid gray', backgroundColor: '#fff', fontSize: '9px' }}>
           <pre>
             <code>
               {JSON.stringify(state, null, 2)}

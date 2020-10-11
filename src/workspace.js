@@ -110,7 +110,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
   return (
     <div ref={workspaceRef} className={classes} style={{ position: 'relative' }} data-possible-action={DESELECT_ALL} onMouseEnter={handleMouseEnterOrMove} onMouseMove={handleMouseEnterOrMove} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
       <div className="Workspace-workLayer" style={{ padding: `${uiSettings.workStripVerticalMargin}px ${uiSettings.workStripHorizontalMargin}px` }}>
-        <Work work={works[0]} />
+        {works.map(work => <Work key={work.id} work={work} />)}
       </div>
       <div className="Workspace-decoratorLayer" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none' }}>
         {selectionRects.map((rect, index) => (
