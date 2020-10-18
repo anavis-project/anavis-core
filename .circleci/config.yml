@@ -1,0 +1,68 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@1.1.6
+  docker: circleci/docker@1.0.0
+
+jobs:
+  build:
+    executor:
+      name: node/default
+      tag: "14.14.0"
+    environment:
+      - NODE_ENV: production
+      - YARN_CACHE_FOLDER: ~/.cache/yarn
+    steps:
+      - checkout
+      - restore_cache:
+          key: yarn-cache-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install Node Modules
+          command: yarn install --non-interactive --check-files --frozen-lockfile --production=false
+      - save_cache:
+          key: yarn-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+      - run:
+          name: Build
+          command: yarn run build
+      - persist_to_workspace:
+          root: "."
+          paths:
+            - build
+            - deploy
+            - nginx.conf
+            - Dockerfile
+  deploy:
+    executor: docker/docker
+    environment:
+      - DEPLOY_ID: anavis.app
+      - DOCKER_IMAGE: anavis/anavis.app
+    steps:
+      - setup_remote_docker
+      - attach_workspace:
+          at: "."
+      - docker/check
+      - docker/build:
+          image: $DOCKER_IMAGE
+          tag: "0.0.$CIRCLE_BUILD_NUM"
+      - docker/push:
+          image: $DOCKER_IMAGE
+          tag: "0.0.$CIRCLE_BUILD_NUM"
+      - run:
+          name: Add deployment target to known hosts
+          command: ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+      - run:
+          name: Deploy container
+          command: ssh $DEPLOY_USER@$DEPLOY_HOST 'bash -s' < ./deploy "$DEPLOY_ID" "$DOCKER_IMAGE:0.0.$CIRCLE_BUILD_NUM"
+
+workflows:
+  build_and_deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master

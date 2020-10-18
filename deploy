@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+set -e
+
+function step_header {
+    printf ' %sSTEP %s - %s%s%s%s' "$NL" "$1" "$2" "$NL" "$stepsSeparator" "$NL"
+}
+
+deployId="$1"
+imageName="$2"
+envVars="$3"
+
+NL=$'\n'
+stepsSeparator=$(printf '=%.0s' {1..120})
+multilinePadding=$(printf '%s%-20s' "$NL" '')
+
+echo "Deployment was initiated using the following options:"
+echo "$stepsSeparator"
+
+printf '%-20s%s\n' "DeployId" "$deployId"
+printf '%-20s%s\n' "ImageName" "$imageName"
+printf '%-20s%s\n' "EnvVars" "${envVars//$NL/"$multilinePadding"}"
+
+if [[ -z "$deployId" ]] ; then
+    echo "deployId should not be empty" >&2
+    exit 1
+fi
+
+if [[ -z "$imageName" ]] ; then
+    echo "imageName should not be empty" >&2
+    exit 1
+fi
+
+step_header '1' 'PULL IMAGE'
+echo "Pulling..."
+docker pull "$imageName"
+
+# This container has to be destroyed at the end:
+step_header '2' 'CHECK/STOP EXISTING CONTAINER'
+runningContainer=$(docker ps -aq -f status=running -f label=deployid=$deployId -f status=running)
+
+if [[ -n "$runningContainer" ]] ; then
+    echo "Found container:"
+    echo "$runningContainer"
+    echo "Stop container:"
+    docker stop $runningContainer
+else
+    echo "No running container was found"
+fi
+
+# Building up the final docker command to run:
+dockerCmd='docker run -d --restart always --log-opt max-size=10m'
+
+# Add the DeployId label
+printf -v dockerCmd '%s -l "deployid=%s"' "$dockerCmd" "${deployId//\"/\\\"}"
+
+# Add container name param:
+dateString=$(date +'%Y-%m-%d-%H-%M-%S')
+printf -v containerName '%s-%s' "$deployId" "$dateString"
+printf -v dockerCmd '%s --name %s' "$dockerCmd" "$containerName"
+
+# Add environment variables line by line:
+if [[ -n "$envVars" ]]; then
+    while read -r line; do
+        printf -v dockerCmd '%s -e "%s"' "$dockerCmd" "${line//\"/\\\"}"
+    done <<< "$envVars"
+fi
+
+# Add the image name:
+printf -v dockerCmd '%s %s' "$dockerCmd" "$imageName"
+
+step_header '3' 'START NEW CONTAINER'
+echo "Starting the container..."
+echo $dockerCmd
+# Run the whole command:
+exec 3>&1 #set up extra file descriptor to redirect diagnostic messages to stdout
+containerId=$(eval $dockerCmd 2>&3)
+exec 3>&- # release the extra file descriptor
+
+echo "Started the container $containerName with id: ${containerId:0:12}"
+
+step_header '4' 'ENSURE NEW CONTAINER IS RUNNING'
+echo "Check if the container is still active in 5 seconds ..."
+sleep 5s
+
+isContainerRunning=$(docker inspect -f {{.State.Running}} $containerId)
+restartCount=$(docker inspect -f "{{.RestartCount}}" $containerId)
+
+if [[ "$isContainerRunning" != "true" ]] ; then
+    echo "The container failed to start or exited prematurely"
+    echo "Removing the container $containerId and trying to rollback"
+    echo $(docker logs $containerId)
+    docker rm -f $containerId > /dev/null
+    if [[ -n $runningContainer ]] ; then
+        docker start $runningContainer
+    fi
+    exit 1
+fi
+
+if [[ "$restartCount" -gt 1 ]] ; then
+    echo "The container restarted more than once, something is wrong"
+    echo "Removing the container $containerId and trying to rollback"
+    echo $(docker logs $containerId)
+    docker rm -f $containerId > /dev/null
+    if [[ -n $runningContainer ]] ; then
+        docker start $runningContainer
+    fi
+    exit 1
+fi
+
+echo "Container is running"
+
+if [[ -n $runningContainer ]] ; then
+    step_header '5' 'REMOVE OLD CONTAINERS'
+    printf 'Removing containers:\n%s\n' "$runningContainer"
+    docker rm -f $runningContainer > /dev/null
+
+    if [[ $? -ne 0 ]] ; then
+        echo "An error occured while removing containers"
+        exit 1
+    fi
+fi
+
+echo " "
+echo "The deployment was successful"
