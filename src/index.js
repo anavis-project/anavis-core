@@ -1,4 +1,4 @@
-import './index.css';
+import './index.scss';
 import Anavis from './anavis';
 import ReactDOM from 'react-dom';
 import React, { useState } from 'react';

@@ -1,0 +1,26 @@
+.Anavis {
+  display: grid;
+  margin: 100px auto;
+  width: 90vw;
+  height: 80vh;
+  grid-template-rows: 1fr;
+  grid-template-columns: 400px 50px 1fr;
+}
+
+.Anavis-debugArea {
+  overflow: scroll;
+  display: grid;
+  grid-row: 1;
+  grid-column: 1;
+  border: 1px solid gray;
+  background-color: #fff;
+  font-size: 9px;
+}
+
+.Anavis-workspaceArea {
+  display: grid;
+  grid-row: 1;
+  grid-column: 3;
+  border: 1px solid gray;
+  background-color: #fff;
+}

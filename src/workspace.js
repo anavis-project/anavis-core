@@ -1,9 +1,11 @@
+import './workspace.scss';
 import Work from './work';
 import classnames from 'classnames';
 import uiSettings from './ui-settings';
 import React, { useEffect } from 'react';
 import findupAttribute from 'findup-attribute';
 import useDimensions from 'react-cool-dimensions';
+import PartSelectionAdorner from './part-selection-adorner';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
 import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
 
@@ -108,14 +110,20 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
   }
 
   return (
-    <div ref={workspaceRef} className={classes} style={{ position: 'relative' }} data-possible-action={DESELECT_ALL} onMouseEnter={handleMouseEnterOrMove} onMouseMove={handleMouseEnterOrMove} onMouseLeave={handleMouseLeave} onMouseDown={handleMouseDown}>
-      <div className="Workspace-workLayer" style={{ padding: `${options.workStripVerticalMargin}px ${options.workStripHorizontalMargin}px` }}>
+    <div
+      ref={workspaceRef}
+      className={classes}
+      data-possible-action={DESELECT_ALL}
+      onMouseEnter={handleMouseEnterOrMove}
+      onMouseMove={handleMouseEnterOrMove}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
+      >
+      <div className="Workspace-layer Workspace-layer--works" style={{ padding: `${options.workStripVerticalMargin}px ${options.workStripHorizontalMargin}px` }}>
         {works.map(work => <Work key={work.id} work={work} partHeight={options.partHeight} />)}
       </div>
-      <div className="Workspace-decoratorLayer" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none' }}>
-        {selectionRects.map((rect, index) => (
-          <div key={index} style={{ position: 'absolute', border: '1px solid #fa8c16', backgroundColor: '#ffa940', opacity: '0.4', ...rect }} />
-        ))}
+      <div className="Workspace-layer Workspace-layer--adorners">
+        {selectionRects.map((rect, index) => <PartSelectionAdorner key={index} {...rect} />)}
       </div>
     </div>
   );

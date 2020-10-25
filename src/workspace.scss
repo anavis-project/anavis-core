@@ -1,0 +1,22 @@
+.Workspace {
+  position: relative;
+
+  &.u-select-part {
+    cursor: pointer;
+  }
+}
+
+.Workspace-layer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  &.Workspace-layer--works {
+  }
+
+  &.Workspace-layer--adorners {
+    pointer-events: none;
+  }
+}
