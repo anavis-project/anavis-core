@@ -1,20 +1,20 @@
 import './work.scss';
-import React, { memo } from 'react';
-import { SELECT_PART } from './actions';
-import { getContrastColor } from './ui-helper';
+import React from 'react';
+import PartStrip from './part-strip';
 
-export default memo(function Work({ work, partHeight }) {
+export default function Work({ work, options }) {
   return (
-    <div className="Work">
-      <div className="Work-parts" data-work-id={work.id} style={{ height: partHeight, gridTemplateColumns: work.parts.map(part => `${part.length}fr`).join(' ') }}>
-        {work.parts.map((part, index) => (
-          <div className="Work-partOuter" key={part.id} data-parent-work-id={work.id} data-part-id={part.id} data-possible-action={SELECT_PART} style={{ gridRow: 1, gridColumn: index + 1, backgroundColor: part.color, color: getContrastColor(part.color) }}>
-            <div className="Work-partInner">
-              <div className="Work-partName">{part.name}</div>
-            </div>
-          </div>
-        ))}
+    <div
+      className="Work"
+      style={{
+        gridTemplateRows: `${options.workVerticalMargin}px 1fr ${options.workVerticalMargin}px`,
+        gridTemplateColumns: `${options.workHorizontalMargin}px 1fr ${options.workHorizontalMargin}px`
+      }}>
+      <div className="Work-left">Links</div>
+      <div className="Work-center">
+        <PartStrip key={work.id} work={work} partHeight={options.partHeight} />
       </div>
+      <div className="Work-right">Rechts</div>
     </div>
   );
-});
+}

@@ -1,28 +1,21 @@
 .Work {
-  margin-bottom: 50px;
-}
-
-.Work-parts {
   display: grid;
 }
 
-.Work-partOuter {
+.Work-left {
+  grid-row: 2;
+  grid-column: 1;
   display: grid;
-  border: 1px solid black;
 }
 
-.Work-partInner {
+.Work-center {
+  grid-row: 2;
+  grid-column: 2;
   display: grid;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.2) 100%);
 }
 
-.Work-partName {
-  width: 100%;
-  padding: 0 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.Work-right {
+  grid-row: 2;
+  grid-column: 3;
+  display: grid;
 }

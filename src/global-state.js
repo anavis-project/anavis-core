@@ -25,8 +25,8 @@ export const initialState = {
   },
   options: {
     partHeight: 50,
-    workStripHorizontalMargin: 50,
-    workStripVerticalMargin: 50
+    workHorizontalMargin: 50,
+    workVerticalMargin: 50
   }
 };
 

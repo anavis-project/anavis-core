@@ -1,6 +1,6 @@
 import './workspace.scss';
-import Work from './work';
 import classnames from 'classnames';
+import PartStrip from './part-strip';
 import uiSettings from './ui-settings';
 import React, { useEffect } from 'react';
 import findupAttribute from 'findup-attribute';
@@ -36,7 +36,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       type: SET_WORKSPACE_INFO,
       info: {
         workspaceWidth: workspaceWidth,
-        avuFactor: getAvuFactorFromWorkspaceWidth(workspaceWidth, options.workStripHorizontalMargin, uiSettings.workspaceSideBarWidth),
+        avuFactor: getAvuFactorFromWorkspaceWidth(workspaceWidth, options.workHorizontalMargin, uiSettings.workspaceSideBarWidth),
       }
     });
   }, [dispatch, workspaceWidth, options]);
@@ -109,6 +109,24 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
     }
   }
 
+  function Work({ work, options }) {
+    return (
+      <div
+        className="Work"
+        style={{
+          display: 'grid',
+          gridTemplateRows: `${options.workVerticalMargin}px 1fr ${options.workVerticalMargin}px`,
+          gridTemplateColumns: `${options.workHorizontalMargin}px 1fr ${options.workHorizontalMargin}px`
+        }}>
+        <div className="Work-left" style={{ gridRow: 2, gridColumn: 1 }}>Links</div>
+        <div className="Work-center" style={{ gridRow: 2, gridColumn: 2, display: 'grid' }}>
+          <PartStrip key={work.id} work={work} partHeight={options.partHeight} />
+        </div>
+        <div className="Work-right" style={{ gridRow: 2, gridColumn: 3 }}>Rechts</div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={workspaceRef}
@@ -119,8 +137,8 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleMouseDown}
       >
-      <div className="Workspace-layer Workspace-layer--works" style={{ padding: `${options.workStripVerticalMargin}px ${options.workStripHorizontalMargin}px` }}>
-        {works.map(work => <Work key={work.id} work={work} partHeight={options.partHeight} />)}
+      <div className="Workspace-layer Workspace-layer--works">
+        {works.map(work => <Work key={work.id} work={work} options={options} />)}
       </div>
       <div className="Workspace-layer Workspace-layer--adorners">
         {selectionRects.map((rect, index) => <PartSelectionAdorner key={index} {...rect} />)}
