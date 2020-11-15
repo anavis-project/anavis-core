@@ -1,6 +1,7 @@
 import './work.scss';
 import React from 'react';
 import PartStrip from './part-strip';
+import PartStripTopControls from './part-strip-top-controls';
 
 export default function Work({ work, options }) {
   return (
@@ -12,7 +13,8 @@ export default function Work({ work, options }) {
       }}>
       <div className="Work-left">Links</div>
       <div className="Work-center">
-        <PartStrip key={work.id} work={work} partHeight={options.partHeight} />
+        <PartStripTopControls work={work} />
+        <PartStrip work={work} partHeight={options.partHeight} />
       </div>
       <div className="Work-right">Rechts</div>
     </div>

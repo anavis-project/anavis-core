@@ -1,18 +1,27 @@
 import './workspace.scss';
+import Work from './work';
 import classnames from 'classnames';
-import PartStrip from './part-strip';
 import uiSettings from './ui-settings';
 import React, { useEffect } from 'react';
 import findupAttribute from 'findup-attribute';
 import useDimensions from 'react-cool-dimensions';
 import PartSelectionAdorner from './part-selection-adorner';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
-import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
+import { MERGE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
 
 function findPossibleAction(event) {
   const element = findupAttribute(event.target, 'data-possible-action') || null;
   const action = element ? element.getAttribute('data-possible-action') : null;
   switch (action) {
+    case MERGE_PARTS:
+      return {
+        action: MERGE_PARTS,
+        workId: element.getAttribute('data-work-id'),
+        leftPartId: element.getAttribute('data-left-part-id'),
+        rightPartId: element.getAttribute('data-right-part-id'),
+        leftPartIndex: Number(element.getAttribute('data-left-part-index')),
+        rightPartIndex: Number(element.getAttribute('data-right-part-index'))
+      };
     case SELECT_PART:
       return {
         action: SELECT_PART,
@@ -78,8 +87,23 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
     }
 
     switch (mouseInfo.possibleAction.action) {
+      case MERGE_PARTS:
+        dispatch({
+          type: MERGE_PARTS,
+          workId: mouseInfo.possibleAction.workId,
+          leftPartId: mouseInfo.possibleAction.leftPartId,
+          rightPartId: mouseInfo.possibleAction.rightPartId,
+          leftPartIndex: mouseInfo.possibleAction.leftPartIndex,
+          rightPartIndex: mouseInfo.possibleAction.rightPartIndex
+        });
+        break;
       case SELECT_PART:
-        dispatch({ type: SELECT_PART, workId: mouseInfo.possibleAction.workId, partId: mouseInfo.possibleAction.partId, ctrlKey: event.ctrlKey });
+        dispatch({
+          type: SELECT_PART,
+          workId: mouseInfo.possibleAction.workId,
+          partId: mouseInfo.possibleAction.partId,
+          ctrlKey: event.ctrlKey
+        });
         break;
       case DESELECT_ALL:
         dispatch({ type: DESELECT_ALL });
@@ -107,24 +131,6 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
         height: workHeight + (2 * uiSettings.selectionRectanglePadding)
       });
     }
-  }
-
-  function Work({ work, options }) {
-    return (
-      <div
-        className="Work"
-        style={{
-          display: 'grid',
-          gridTemplateRows: `${options.workVerticalMargin}px 1fr ${options.workVerticalMargin}px`,
-          gridTemplateColumns: `${options.workHorizontalMargin}px 1fr ${options.workHorizontalMargin}px`
-        }}>
-        <div className="Work-left" style={{ gridRow: 2, gridColumn: 1 }}>Links</div>
-        <div className="Work-center" style={{ gridRow: 2, gridColumn: 2, display: 'grid' }}>
-          <PartStrip key={work.id} work={work} partHeight={options.partHeight} />
-        </div>
-        <div className="Work-right" style={{ gridRow: 2, gridColumn: 3 }}>Rechts</div>
-      </div>
-    );
   }
 
   return (

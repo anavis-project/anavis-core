@@ -1,7 +1,7 @@
 import testDoc01 from './docs/01.json';
 import testDoc02 from './docs/02.json';
 import testDoc03 from './docs/03.json';
-import { SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
+import { MERGE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
 
 export const initialState = {
   works: [testDoc01, testDoc02, testDoc03],
@@ -93,8 +93,32 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey }
   };
 }
 
+function mergePartsInWork({ work, leftPartIndex, rightPartIndex }) {
+  return {
+    ...work,
+    parts: work.parts.reduce((all, part, index) => {
+      if (index <= leftPartIndex || index > rightPartIndex) {
+        all.push(part);
+      } else {
+        const last = all[all.length - 1];
+        all[all.length - 1] = { ...last, length: last.length + part.length };
+      }
+      return all;
+    }, [])
+  }
+}
+
 export function reducer(state, action) {
   switch (action.type) {
+    case MERGE_PARTS:
+      return {
+        ...state,
+        works: state.works.map(work => {
+          return work.id === action.workId
+            ? mergePartsInWork({ work, leftPartIndex: action.leftPartIndex, rightPartIndex: action.rightPartIndex })
+            : work
+        })
+      };
     case SELECT_PART:
       return {
         ...state,
