@@ -7,7 +7,7 @@ import findupAttribute from 'findup-attribute';
 import useDimensions from 'react-cool-dimensions';
 import PartSelectionAdorner from './part-selection-adorner';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
-import { MERGE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
 
 function findPossibleAction(event) {
   const element = findupAttribute(event.target, 'data-possible-action') || null;
@@ -16,6 +16,15 @@ function findPossibleAction(event) {
     case MERGE_PARTS:
       return {
         action: MERGE_PARTS,
+        workId: element.getAttribute('data-work-id'),
+        leftPartId: element.getAttribute('data-left-part-id'),
+        rightPartId: element.getAttribute('data-right-part-id'),
+        leftPartIndex: Number(element.getAttribute('data-left-part-index')),
+        rightPartIndex: Number(element.getAttribute('data-right-part-index'))
+      };
+    case RESIZE_PARTS:
+      return {
+        action: RESIZE_PARTS,
         workId: element.getAttribute('data-work-id'),
         leftPartId: element.getAttribute('data-left-part-id'),
         rightPartId: element.getAttribute('data-right-part-id'),
@@ -90,6 +99,16 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       case MERGE_PARTS:
         dispatch({
           type: MERGE_PARTS,
+          workId: mouseInfo.possibleAction.workId,
+          leftPartId: mouseInfo.possibleAction.leftPartId,
+          rightPartId: mouseInfo.possibleAction.rightPartId,
+          leftPartIndex: mouseInfo.possibleAction.leftPartIndex,
+          rightPartIndex: mouseInfo.possibleAction.rightPartIndex
+        });
+        break;
+      case RESIZE_PARTS:
+        dispatch({
+          type: RESIZE_PARTS,
           workId: mouseInfo.possibleAction.workId,
           leftPartId: mouseInfo.possibleAction.leftPartId,
           rightPartId: mouseInfo.possibleAction.rightPartId,

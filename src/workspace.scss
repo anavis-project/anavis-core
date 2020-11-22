@@ -8,6 +8,10 @@
   &.u-merge-parts {
     cursor: pointer;
   }
+
+  &.u-resize-parts {
+    cursor: ew-resize;
+  }
 }
 
 .Workspace-layer {

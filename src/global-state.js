@@ -1,7 +1,7 @@
 import testDoc01 from './docs/01.json';
 import testDoc02 from './docs/02.json';
 import testDoc03 from './docs/03.json';
-import { MERGE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
 
 export const initialState = {
   works: [testDoc01, testDoc02, testDoc03],
@@ -124,6 +124,9 @@ export function reducer(state, action) {
         }),
         selection: createEmptySelection()
       };
+    case RESIZE_PARTS:
+      console.log('RESIZE_PARTS is not implemented');
+      return state;
     case SELECT_PART:
       return {
         ...state,

@@ -14,7 +14,7 @@ export default memo(function PartBorderControls({ work, width, height, children 
           key={part.id}
           style={{ gridRow: 1, gridColumn: index + 1 }}
           >
-          <div style={{ width: width, marginRight: -(width / 2) }}>
+          <div style={{ display: 'grid', justifyItems: 'center', alignItems: 'center', width: width, marginRight: -(width / 2) }}>
             {children({
               leftIndex: index,
               rightIndex: index + 1,

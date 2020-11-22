@@ -1,20 +1,20 @@
 @import './variables.scss';
 
-$iconColor: red;
+$iconColor: #0a64a4;
 
-.PartStripTopControls {
+.PartStripBottomControls {
   opacity: 0;
   transition: all 0.5s;
 }
 
-.PartStripTopControls-iconContainer {
+.PartStripBottomControls-iconContainer {
   display: grid;
   align-items: center;
   justify-items: center;
   position: relative;
 
   &:hover {
-    .PartStripTopControls-mergeIcon {
+    .PartStripBottomControls-resizeIcon {
       color: $iconColor;
       opacity: 1;
       transition: all 0.1s;
@@ -22,14 +22,14 @@ $iconColor: red;
   }
 }
 
-.PartStripTopControls-mergeIcon {
+.PartStripBottomControls-resizeIcon {
   color: desaturate($iconColor, 10%);
   opacity: 0.5;
   transition: all 0.5s;
 }
 
 #{$mouseOverWork} {
-  .PartStripTopControls {
+  .PartStripBottomControls {
     opacity: 1;
     transition: all 0.1s;
   }
