@@ -42,7 +42,7 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   const isSelected = alreadySelectedPartIds.includes(partId);
   const isOneOfMultiple = isSelected && alreadySelectedPartIds.length > 1;
   const isAddOrSubtract = ctrlKey;
-  const isMerge = !ctrlKey && shiftKey && currentSelection.chunks.length === 1;
+  const isMerge = !ctrlKey && shiftKey && !isOneOfMultiple && alreadySelectedPartIds.length && currentSelection.chunks.length === 1;
   let newSelectedPartIds;
   if (isAddOrSubtract) {
     newSelectedPartIds = isSelected ? alreadySelectedPartIds.filter(x => x !== partId) : alreadySelectedPartIds.concat([partId]);
