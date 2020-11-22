@@ -5,12 +5,7 @@ import { MERGE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_I
 
 export const initialState = {
   works: [testDoc01, testDoc02, testDoc03],
-  selection: {
-    workId: null,
-    partIds: [],
-    partIndices: [],
-    chunks: []
-  },
+  selection: createEmptySelection(),
   mouseInfo: {
     lastWorkspacePosition: {
       x: 0,
@@ -29,6 +24,15 @@ export const initialState = {
     workVerticalMargin: 50
   }
 };
+
+function createEmptySelection() {
+  return {
+    workId: null,
+    partIds: [],
+    partIndices: [],
+    chunks: []
+  };
+}
 
 function createNewSelection({ works, currentSelection, workId, partId, ctrlKey }) {
   // If the currently selected parts come from the same work, we keep them, otherwise, we start with an empty list:
@@ -117,7 +121,8 @@ export function reducer(state, action) {
           return work.id === action.workId
             ? mergePartsInWork({ work, leftPartIndex: action.leftPartIndex, rightPartIndex: action.rightPartIndex })
             : work
-        })
+        }),
+        selection: createEmptySelection()
       };
     case SELECT_PART:
       return {

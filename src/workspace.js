@@ -82,7 +82,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
   };
 
   const handleMouseDown = event => {
-    if (!mouseInfo.possibleAction) {
+    if (!mouseInfo.possibleAction || event.button !== 0) {
       return;
     }
 
@@ -117,7 +117,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
 
   const selectionRects = [];
   if (selection.chunks.length) {
-    const workElement = workspaceRef.current.querySelector(`[data-work-id="${selection.workId}"]`);
+    const workElement = workspaceRef.current.querySelector(`[data-role="part-strip"][data-work-id="${selection.workId}"]`);
     const workTop = workElement.offsetTop;
     const workLeft = workElement.offsetLeft;
     const workHeight = workElement.offsetHeight;

@@ -5,10 +5,12 @@ import { getContrastColor } from './ui-helper';
 
 export default memo(function PartStrip({ work, partHeight }) {
   return (
-    <div className="PartStrip">
+    <div className="PartStrip"
+      data-role="part-strip"
+      data-work-id={work.id}
+      >
       <div
         className="PartStrip-parts"
-        data-work-id={work.id}
         style={{ height: partHeight, gridTemplateColumns: work.parts.map(part => `${part.length}fr`).join(' ') }}
         >
         {work.parts.map((part, index) => (

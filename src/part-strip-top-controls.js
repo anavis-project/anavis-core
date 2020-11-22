@@ -13,13 +13,13 @@ export default memo(function PartStripTopControls({ work }) {
       <PartBorderControls work={work} width={BUTTON_WIDTH} height={BUTTON_WIDTH}>
         {({ leftPart, rightPart, leftIndex, rightIndex }) => (
           <div
+            className="PartStripTopControls-iconContainer"
             data-work-id={work.id}
             data-left-part-id={leftPart.id}
             data-right-part-id={rightPart.id}
             data-left-part-index={leftIndex}
             data-right-part-index={rightIndex}
             data-possible-action={MERGE_PARTS}
-            style={{ display: 'grid', alignItems: 'center', justifyItems: 'center' }}
             >
             <FontAwesomeIcon icon={faTimes} size="xs" className="PartStripTopControls-mergeIcon" />
           </div>

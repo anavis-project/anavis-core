@@ -1,13 +1,33 @@
-.PartStripTopControls {}
+@import './variables.scss';
+
+.PartStripTopControls {
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+.PartStripTopControls-iconContainer {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  position: relative;
+
+  &:hover {
+    .PartStripTopControls-mergeIcon {
+      color: red;
+      opacity: 1;
+      transition: all 0.1s;
+    }
+  }
+}
 
 .PartStripTopControls-mergeIcon {
-  cursor: pointer;
   color: gray;
   opacity: 0.5;
   transition: all 0.5s;
+}
 
-  &:hover {
-    color: red;
+#{$mouseOverWork} {
+  .PartStripTopControls {
     opacity: 1;
     transition: all 0.1s;
   }
