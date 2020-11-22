@@ -121,7 +121,8 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
           type: SELECT_PART,
           workId: mouseInfo.possibleAction.workId,
           partId: mouseInfo.possibleAction.partId,
-          ctrlKey: event.ctrlKey
+          ctrlKey: event.ctrlKey,
+          shiftKey: event.shiftKey
         });
         break;
       case DESELECT_ALL:

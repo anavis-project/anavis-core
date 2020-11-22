@@ -34,23 +34,38 @@ function createEmptySelection() {
   };
 }
 
-function createNewSelection({ works, currentSelection, workId, partId, ctrlKey }) {
+function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, shiftKey }) {
+  const work = works.find(w => w.id === workId);
+
   // If the currently selected parts come from the same work, we keep them, otherwise, we start with an empty list:
   const alreadySelectedPartIds = (currentSelection.workId === workId) ? currentSelection.partIds : [];
   const isSelected = alreadySelectedPartIds.includes(partId);
   const isOneOfMultiple = isSelected && alreadySelectedPartIds.length > 1;
   const isAddOrSubtract = ctrlKey;
+  const isMerge = !ctrlKey && shiftKey && currentSelection.chunks.length === 1;
   let newSelectedPartIds;
   if (isAddOrSubtract) {
     newSelectedPartIds = isSelected ? alreadySelectedPartIds.filter(x => x !== partId) : alreadySelectedPartIds.concat([partId]);
   } else if (isOneOfMultiple) {
     newSelectedPartIds = [partId];
+  } else if (isMerge) {
+    newSelectedPartIds = Array.from(work.parts.reduce((obj, part) => {
+      if (alreadySelectedPartIds.includes(part.id)) {
+        obj.chunkProcessed = true;
+        obj.ids.add(part.id);
+      } else if (part.id === partId) {
+        obj.partProcessed = true;
+        obj.ids.add(part.id);
+      } else if (obj.chunkProcessed !== obj.partProcessed) {
+        obj.ids.add(part.id)
+      }
+      return obj;
+    }, { ids: new Set(), chunkProcessed: false, partProcessed: false }).ids);
   } else {
     newSelectedPartIds = isSelected ? [] : [partId];
   }
   const newSelectedWorkId = newSelectedPartIds.length ? workId : null;
 
-  const work = works.find(w => w.id === workId);
   const partIndices = work.parts.reduce((indices, part, index) => {
     if (newSelectedPartIds.includes(part.id)) {
       indices.push(index);
@@ -135,7 +150,8 @@ export function reducer(state, action) {
           currentSelection: state.selection,
           workId: action.workId,
           partId: action.partId,
-          ctrlKey: action.ctrlKey
+          ctrlKey: action.ctrlKey,
+          shiftKey: action.shiftKey,
         })
       };
     case DESELECT_ALL:
