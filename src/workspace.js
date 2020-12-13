@@ -74,7 +74,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
     });
   };
 
-  const handleMouseLeave = event => {
+  const handleMouseLeaveOrUp = event => {
     const clientRect = workspaceRef.current.getBoundingClientRect();
     dispatch({
       type: SET_MOUSE_INFO,
@@ -133,7 +133,8 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
     }
   };
 
-  const classes = classnames(['Workspace', mouseInfo.possibleAction ? `u-${mouseInfo.possibleAction.action}` : null]);
+  const action = mouseInfo.currentAction?.type || mouseInfo.possibleAction?.action || null;
+  const classes = classnames(['Workspace', action ? `u-${action}` : null]);
 
   const selectionRects = [];
   if (selection.chunks.length) {
@@ -160,8 +161,9 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       data-possible-action={DESELECT_ALL}
       onMouseEnter={handleMouseEnterOrMove}
       onMouseMove={handleMouseEnterOrMove}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={handleMouseLeaveOrUp}
       onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseLeaveOrUp}
       >
       <div className="Workspace-layer Workspace-layer--works">
         {works.map(work => <Work key={work.id} work={work} options={options} />)}

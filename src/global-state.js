@@ -1,6 +1,7 @@
 import testDoc01 from './docs/01.json';
 import testDoc02 from './docs/02.json';
 import testDoc03 from './docs/03.json';
+import { px2Avu, MIN_PART_LENGTH_IN_AVUS } from './avu-helper';
 import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
 
 export const initialState = {
@@ -127,6 +128,67 @@ function mergePartsInWork({ work, leftPartIndex, rightPartIndex }) {
   }
 }
 
+function modifyCurrentActionOnMousePositionChange(currentAction, mouseInfo, workspaceInfo) {
+  if (currentAction.type === RESIZE_PARTS) {
+    return {
+      ...currentAction,
+      offsetInAvus: Math.round(px2Avu(mouseInfo.lastWorkspacePosition.x - currentAction.startX, workspaceInfo.avuFactor))
+    }
+  } else {
+    return currentAction;
+  }
+}
+
+function modifyWorksOnMousePositionChange(currentAction, works) {
+  if (currentAction.type === RESIZE_PARTS) {
+    const workId = currentAction.workId;
+    return works.map(work => {
+      if (work.id === workId) {
+        const leftPart = work.parts[currentAction.leftPartIndex];
+        const rightPart = work.parts[currentAction.rightPartIndex];
+        const offsetInAvus = currentAction.offsetInAvus;
+        let newLeftPartLength;
+        let newRightPartLength;
+        if (offsetInAvus < 0) {
+          const avusToSubtract = Math.min(currentAction.leftPartLength - MIN_PART_LENGTH_IN_AVUS, Math.abs(offsetInAvus));
+          newLeftPartLength = currentAction.leftPartLength - avusToSubtract;
+          newRightPartLength = currentAction.rightPartLength + avusToSubtract;
+        } else if (offsetInAvus > 0) {
+          const avusToSubtract = Math.min(currentAction.rightPartLength - MIN_PART_LENGTH_IN_AVUS, Math.abs(offsetInAvus));
+          newLeftPartLength = currentAction.leftPartLength + avusToSubtract;
+          newRightPartLength = currentAction.rightPartLength - avusToSubtract;
+        } else {
+          newLeftPartLength = currentAction.leftPartLength;
+          newRightPartLength = currentAction.rightPartLength;
+        }
+
+        return (newLeftPartLength !== leftPart.length) ? {
+          ...work,
+          parts: work.parts.map(part => {
+            if (part.id === leftPart.id) {
+              return {
+                ...part,
+                length: newLeftPartLength
+              };
+            } else if (part.id === rightPart.id) {
+              return {
+                ...part,
+                length: newRightPartLength
+              };
+            } else {
+              return part;
+            }
+          })
+        } : work;
+      } else {
+        return work;
+      }
+    });
+  } else {
+    return works;
+  }
+}
+
 export function reducer(state, action) {
   switch (action.type) {
     case MERGE_PARTS:
@@ -140,8 +202,26 @@ export function reducer(state, action) {
         selection: createEmptySelection()
       };
     case RESIZE_PARTS:
-      console.log('RESIZE_PARTS is not implemented');
-      return state;
+      const work = state.works.find(w => w.id === action.workId);
+      return {
+        ...state,
+        mouseInfo: {
+          ...state.mouseInfo,
+          currentAction: {
+            type: RESIZE_PARTS,
+            workId: action.workId,
+            leftPartId: action.leftPartId,
+            rightPartId: action.rightPartId,
+            leftPartIndex: action.leftPartIndex,
+            rightPartIndex: action.rightPartIndex,
+            leftPartLength: work.parts[action.leftPartIndex].length,
+            rightPartLength: work.parts[action.rightPartIndex].length,
+            startX: state.mouseInfo.lastWorkspacePosition.x,
+            offsetInAvus: 0
+          }
+        },
+        selection: createEmptySelection()
+      };
     case SELECT_PART:
       return {
         ...state,
@@ -165,9 +245,15 @@ export function reducer(state, action) {
         }
       };
     case SET_MOUSE_INFO:
+      const currentAction = action.info.currentAction ? modifyCurrentActionOnMousePositionChange(action.info.currentAction, action.info, state.workspaceInfo) : null;
+      const works = currentAction ? modifyWorksOnMousePositionChange(currentAction, state.works) : state.works;
       return {
         ...state,
-        mouseInfo: action.info
+        works: works,
+        mouseInfo: {
+          ...action.info,
+          currentAction: currentAction
+        }
       }
     case SET_WORKSPACE_INFO:
       return {
