@@ -1,5 +1,23 @@
+$areaColor: rgb(163, 201, 236);
+
 .PartBorderControls {
   display: grid;
+  align-items: center;
+}
+
+.PartBorderControls-splitArea {
+  height: 12px;
+  margin: 0 8px;
+  border-radius: 0;
+  background-color: desaturate($areaColor, 10%);
+  opacity: 0.5;
+  transition: all 0.5s;
+
+  &:hover {
+    background-color: $areaColor;
+    opacity: 1;
+    transition: all 0.1s;
+  }
 }
 
 .PartBorderControls-control {

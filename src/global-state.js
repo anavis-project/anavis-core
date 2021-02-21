@@ -2,10 +2,9 @@ import testDoc01 from './docs/01.json';
 import testDoc02 from './docs/02.json';
 import testDoc03 from './docs/03.json';
 import { px2Avu, MIN_PART_LENGTH_IN_AVUS } from './avu-helper';
-import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS, SPLIT_PART } from './actions';
 
 export const initialState = {
-  works: [testDoc01, testDoc02, testDoc03],
   selection: createEmptySelection(),
   mouseInfo: {
     lastWorkspacePosition: {
@@ -23,7 +22,8 @@ export const initialState = {
     partHeight: 50,
     workHorizontalMargin: 50,
     workVerticalMargin: 50
-  }
+  },
+  works: [testDoc01, testDoc02, testDoc03]
 };
 
 function createEmptySelection() {
@@ -128,6 +128,18 @@ function mergePartsInWork({ work, leftPartIndex, rightPartIndex }) {
   }
 }
 
+function modifyPossibleActionOnMousePositionChange(possibleAction, mouseInfo, workspaceInfo) {
+  if (possibleAction.action === SPLIT_PART) {
+    return {
+      ...possibleAction,
+      test: 'hello',
+      x: mouseInfo.lastWorkspacePosition.x
+    }
+  } else {
+    return possibleAction;
+  }
+}
+
 function modifyCurrentActionOnMousePositionChange(currentAction, mouseInfo, workspaceInfo) {
   if (currentAction.type === RESIZE_PARTS) {
     return {
@@ -222,6 +234,23 @@ export function reducer(state, action) {
         },
         selection: createEmptySelection()
       };
+    case SPLIT_PART:
+      const work2 = state.works.find(w => w.id === action.workId);
+      return {
+        ...state,
+        mouseInfo: {
+          ...state.mouseInfo,
+          currentAction: {
+            type: SPLIT_PART,
+            workId: action.workId,
+            partId: action.partId,
+            partIndex: action.partIndex,
+            partLength: work2.parts[action.partIndex].length,
+            x: state.mouseInfo.lastWorkspacePosition.x
+          }
+        },
+        selection: createEmptySelection()
+      };
     case SELECT_PART:
       return {
         ...state,
@@ -245,6 +274,7 @@ export function reducer(state, action) {
         }
       };
     case SET_MOUSE_INFO:
+      const possibleAction = action.info.possibleAction ? modifyPossibleActionOnMousePositionChange(action.info.possibleAction, action.info, state.workspaceInfo) : null;
       const currentAction = action.info.currentAction ? modifyCurrentActionOnMousePositionChange(action.info.currentAction, action.info, state.workspaceInfo) : null;
       const works = currentAction ? modifyWorksOnMousePositionChange(currentAction, state.works) : state.works;
       return {
@@ -252,6 +282,7 @@ export function reducer(state, action) {
         works: works,
         mouseInfo: {
           ...action.info,
+          possibleAction: possibleAction,
           currentAction: currentAction
         }
       }
