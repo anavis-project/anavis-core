@@ -1,11 +1,11 @@
+import { v4 } from 'uuid';
 import testDoc01 from './docs/01.json';
 import testDoc02 from './docs/02.json';
 import testDoc03 from './docs/03.json';
 import { px2Avu, MIN_PART_LENGTH_IN_AVUS } from './avu-helper';
-import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS, SPLIT_PART } from './actions';
 
 export const initialState = {
-  works: [testDoc01, testDoc02, testDoc03],
   selection: createEmptySelection(),
   mouseInfo: {
     lastWorkspacePosition: {
@@ -23,7 +23,8 @@ export const initialState = {
     partHeight: 50,
     workHorizontalMargin: 50,
     workVerticalMargin: 50
-  }
+  },
+  works: [testDoc01, testDoc02, testDoc03]
 };
 
 function createEmptySelection() {
@@ -128,6 +129,51 @@ function mergePartsInWork({ work, leftPartIndex, rightPartIndex }) {
   }
 }
 
+function splitPart(part, atOffset) {
+  const oldLength = part.length;
+
+  const leftPart = {
+    ...part,
+    length: atOffset
+  };
+
+  const rightPart = {
+    id: v4(),
+    name: leftPart.name,
+    color: leftPart.color,
+    length: oldLength - leftPart.length
+  }
+
+  return [leftPart, rightPart];
+}
+
+function splitPartInWork({ work, partIndex, offsetInAvus }) {
+  return {
+    ...work,
+    parts: work.parts.reduce((all, part, index) => {
+      if (index === partIndex) {
+        const lengthOfPrecedingParts = all.reduce((accu, p) => accu + p.length, 0);
+        const [leftPart, rightPart] = splitPart(part, offsetInAvus - lengthOfPrecedingParts);
+        return [...all, leftPart, rightPart];
+      } else {
+        return [...all, part];
+      }
+    }, [])
+  }
+}
+
+function modifyPossibleActionOnMousePositionChange(possibleAction, mouseInfo, workspaceInfo, options) {
+  if (possibleAction.action === SPLIT_PART) {
+    return {
+      ...possibleAction,
+      workspaceX: mouseInfo.lastWorkspacePosition.x,
+      offsetInAvus: px2Avu(mouseInfo.lastWorkspacePosition.x - options.workHorizontalMargin, workspaceInfo.avuFactor)
+    }
+  } else {
+    return possibleAction;
+  }
+}
+
 function modifyCurrentActionOnMousePositionChange(currentAction, mouseInfo, workspaceInfo) {
   if (currentAction.type === RESIZE_PARTS) {
     return {
@@ -190,6 +236,8 @@ function modifyWorksOnMousePositionChange(currentAction, works) {
 }
 
 export function reducer(state, action) {
+  const actionWork = action.workId ? state.works.find(work => work.id === action.workId) : null;
+
   switch (action.type) {
     case MERGE_PARTS:
       return {
@@ -202,7 +250,6 @@ export function reducer(state, action) {
         selection: createEmptySelection()
       };
     case RESIZE_PARTS:
-      const work = state.works.find(w => w.id === action.workId);
       return {
         ...state,
         mouseInfo: {
@@ -214,12 +261,22 @@ export function reducer(state, action) {
             rightPartId: action.rightPartId,
             leftPartIndex: action.leftPartIndex,
             rightPartIndex: action.rightPartIndex,
-            leftPartLength: work.parts[action.leftPartIndex].length,
-            rightPartLength: work.parts[action.rightPartIndex].length,
+            leftPartLength: actionWork.parts[action.leftPartIndex].length,
+            rightPartLength: actionWork.parts[action.rightPartIndex].length,
             startX: state.mouseInfo.lastWorkspacePosition.x,
             offsetInAvus: 0
           }
         },
+        selection: createEmptySelection()
+      };
+    case SPLIT_PART:
+      return {
+        ...state,
+        works: state.works.map(work => {
+          return work.id === action.workId
+            ? splitPartInWork({ work, partIndex: action.partIndex, offsetInAvus: action.offsetInAvus })
+            : work
+        }),
         selection: createEmptySelection()
       };
     case SELECT_PART:
@@ -245,6 +302,7 @@ export function reducer(state, action) {
         }
       };
     case SET_MOUSE_INFO:
+      const possibleAction = action.info.possibleAction ? modifyPossibleActionOnMousePositionChange(action.info.possibleAction, action.info, state.workspaceInfo, state.options) : null;
       const currentAction = action.info.currentAction ? modifyCurrentActionOnMousePositionChange(action.info.currentAction, action.info, state.workspaceInfo) : null;
       const works = currentAction ? modifyWorksOnMousePositionChange(currentAction, state.works) : state.works;
       return {
@@ -252,6 +310,7 @@ export function reducer(state, action) {
         works: works,
         mouseInfo: {
           ...action.info,
+          possibleAction: possibleAction,
           currentAction: currentAction
         }
       }

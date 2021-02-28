@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import './part-border-controls.scss';
+import { SPLIT_PART } from './actions';
 
 export default memo(function PartBorderControls({ work, width, height, children }) {
   return (
@@ -23,6 +24,16 @@ export default memo(function PartBorderControls({ work, width, height, children 
             })}
           </div>
         </div>
+      ))}
+      {work.parts.map((part, index) => (
+        <div
+          key={part.id}
+          data-work-id={work.id}
+          data-part-id={part.id}
+          data-part-index={index}
+          data-possible-action={SPLIT_PART}
+          className="PartBorderControls-splitArea"
+          style={{ gridRow: 1, gridColumn: index + 1 }} />
       ))}
     </div>
   );

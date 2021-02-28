@@ -4,10 +4,11 @@ import classnames from 'classnames';
 import uiSettings from './ui-settings';
 import React, { useEffect } from 'react';
 import findupAttribute from 'findup-attribute';
+import { getContrastColor } from './ui-helper';
 import useDimensions from 'react-cool-dimensions';
 import PartSelectionAdorner from './part-selection-adorner';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
-import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SPLIT_PART } from './actions';
 
 function findPossibleAction(event) {
   const element = findupAttribute(event.target, 'data-possible-action') || null;
@@ -30,6 +31,13 @@ function findPossibleAction(event) {
         rightPartId: element.getAttribute('data-right-part-id'),
         leftPartIndex: Number(element.getAttribute('data-left-part-index')),
         rightPartIndex: Number(element.getAttribute('data-right-part-index'))
+      };
+    case SPLIT_PART:
+      return {
+        action: SPLIT_PART,
+        workId: element.getAttribute('data-work-id'),
+        partId: element.getAttribute('data-part-id'),
+        partIndex: Number(element.getAttribute('data-part-index'))
       };
     case SELECT_PART:
       return {
@@ -116,6 +124,16 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
           rightPartIndex: mouseInfo.possibleAction.rightPartIndex
         });
         break;
+      case SPLIT_PART:
+        dispatch({
+          type: SPLIT_PART,
+          workId: mouseInfo.possibleAction.workId,
+          partId: mouseInfo.possibleAction.partId,
+          partIndex: mouseInfo.possibleAction.partIndex,
+          workspaceX: mouseInfo.possibleAction.workspaceX,
+          offsetInAvus: mouseInfo.possibleAction.offsetInAvus
+        });
+        break;
       case SELECT_PART:
         dispatch({
           type: SELECT_PART,
@@ -154,6 +172,22 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
     }
   }
 
+  let splitIndicator = null;
+  if (mouseInfo.possibleAction?.action === SPLIT_PART) {
+    const work = works.find(w => w.id === mouseInfo.possibleAction.workId);
+    const part = work.parts[mouseInfo.possibleAction.partIndex];
+    const workElement = workspaceRef.current.querySelector(`[data-role="part-strip"][data-work-id="${mouseInfo.possibleAction.workId}"]`);
+    const workTop = workElement.offsetTop;
+    // const workLeft = workElement.offsetLeft;
+    const workHeight = workElement.offsetHeight;
+    splitIndicator = {
+      left: mouseInfo.possibleAction.workspaceX,
+      top: workTop,
+      height: workHeight,
+      color: getContrastColor(part.color, 0.6)
+    };
+  }
+
   return (
     <div
       ref={workspaceRef}
@@ -170,6 +204,15 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       </div>
       <div className="Workspace-layer Workspace-layer--adorners">
         {selectionRects.map((rect, index) => <PartSelectionAdorner key={index} {...rect} />)}
+        {splitIndicator && <div style={{
+          position: 'absolute',
+          width: 6,
+          borderLeft: `2px dotted ${splitIndicator.color}`,
+          left: splitIndicator.left,
+          top: splitIndicator.top,
+          height: splitIndicator.height
+        }}
+        />}
       </div>
     </div>
   );
