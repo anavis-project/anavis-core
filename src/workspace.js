@@ -33,7 +33,6 @@ function findPossibleAction(event) {
         rightPartIndex: Number(element.getAttribute('data-right-part-index'))
       };
     case SPLIT_PART:
-      console.log('split', event.nativeEvent);
       return {
         action: SPLIT_PART,
         workId: element.getAttribute('data-work-id'),
@@ -126,7 +125,15 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
         });
         break;
       case SPLIT_PART:
-        throw new Error('NOT IMPLEMENTED');
+        dispatch({
+          type: SPLIT_PART,
+          workId: mouseInfo.possibleAction.workId,
+          partId: mouseInfo.possibleAction.partId,
+          partIndex: mouseInfo.possibleAction.partIndex,
+          workspaceX: mouseInfo.possibleAction.workspaceX,
+          offsetInAvus: mouseInfo.possibleAction.offsetInAvus
+        });
+        break;
       case SELECT_PART:
         dispatch({
           type: SELECT_PART,
@@ -174,10 +181,10 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
     // const workLeft = workElement.offsetLeft;
     const workHeight = workElement.offsetHeight;
     splitIndicator = {
-      left: mouseInfo.possibleAction.x,
+      left: mouseInfo.possibleAction.workspaceX,
       top: workTop,
       height: workHeight,
-      color: getContrastColor(part.color)
+      color: getContrastColor(part.color, 0.6)
     };
   }
 
@@ -200,7 +207,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
         {splitIndicator && <div style={{
           position: 'absolute',
           width: 6,
-          borderLeft: `3px dotted ${splitIndicator.color}`,
+          borderLeft: `2px dotted ${splitIndicator.color}`,
           left: splitIndicator.left,
           top: splitIndicator.top,
           height: splitIndicator.height
