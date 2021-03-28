@@ -8,7 +8,7 @@ import { getContrastColor } from './ui-helper';
 import useDimensions from 'react-cool-dimensions';
 import PartSelectionAdorner from './part-selection-adorner';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
-import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SPLIT_PART } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SPLIT_PART, OPEN_DOCUMENTS } from './actions';
 
 function findPossibleAction(event) {
   const element = findupAttribute(event.target, 'data-possible-action') || null;
@@ -54,8 +54,10 @@ function findPossibleAction(event) {
   }
 }
 
-export default function Workspace({ works, selection, mouseInfo, workspaceInfo, options, dispatch }) {
+export default function Workspace({ documents, selection, mouseInfo, workspaceInfo, options, dispatch }) {
   const { ref: workspaceRef, width: workspaceWidth } = useDimensions({ useBorderBoxSize: true });
+
+  const works = documents.map(doc => doc.work);
 
   useEffect(() => {
     dispatch({
@@ -178,7 +180,6 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
     const part = work.parts[mouseInfo.possibleAction.partIndex];
     const workElement = workspaceRef.current.querySelector(`[data-role="part-strip"][data-work-id="${mouseInfo.possibleAction.workId}"]`);
     const workTop = workElement.offsetTop;
-    // const workLeft = workElement.offsetLeft;
     const workHeight = workElement.offsetHeight;
     splitIndicator = {
       left: mouseInfo.possibleAction.workspaceX,
@@ -187,6 +188,12 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       color: getContrastColor(part.color, 0.6)
     };
   }
+
+  const handleOpenDocumentClick = () => {
+    dispatch({
+      type: OPEN_DOCUMENTS
+    });
+  };
 
   return (
     <div
@@ -201,6 +208,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       >
       <div className="Workspace-layer Workspace-layer--works">
         {works.map(work => <Work key={work.id} work={work} options={options} />)}
+        <button onClick={handleOpenDocumentClick}>Open Document</button>
       </div>
       <div className="Workspace-layer Workspace-layer--adorners">
         {selectionRects.map((rect, index) => <PartSelectionAdorner key={index} {...rect} />)}

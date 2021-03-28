@@ -6,3 +6,6 @@ export const DESELECT_ALL = 'deselect-all';
 export const SET_MOUSE_INFO = 'set-mouse-info';
 export const SET_WORKSPACE_INFO = 'set-workspace-info';
 export const SET_OPTIONS = 'set-options';
+export const OPEN_DOCUMENTS = 'open-documents';
+export const START_OPEN_DOCUMENTS = 'start-open-documents';
+export const END_OPEN_DOCUMENTS = 'end-open-documents';
