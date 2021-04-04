@@ -14,7 +14,10 @@ import {
   SPLIT_PART,
   OPEN_DOCUMENTS,
   START_OPEN_DOCUMENTS,
-  END_OPEN_DOCUMENTS
+  END_OPEN_DOCUMENTS,
+  SAVE_DOCUMENT,
+  START_SAVE_DOCUMENT,
+  END_SAVE_DOCUMENT
 } from './actions';
 
 export const initialState = {
@@ -365,6 +368,14 @@ export function reducer(state, action) {
           ...action.documents
         ]
       }
+    case START_SAVE_DOCUMENT:
+      return {
+        ...state
+      }
+    case END_SAVE_DOCUMENT:
+      return {
+        ...state
+      }
     default:
       throw new Error(`Action type ${action.type} is not implemented!`);
   }
@@ -376,5 +387,11 @@ export const asyncActionHandlers = {
     const state = getState();
     const documents = await state.options.documentManager.openDocuments();
     dispatch({ type: END_OPEN_DOCUMENTS, documents: documents });
+  },
+  [SAVE_DOCUMENT]: ({ dispatch, getState }) => async (action) => {
+    dispatch({ type: START_SAVE_DOCUMENT, doc: action.doc });
+    const state = getState();
+    await state.options.documentManager.saveDocument(action.doc);
+    dispatch({ type: END_SAVE_DOCUMENT, doc: action.doc });
   }
 }

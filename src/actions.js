@@ -9,3 +9,6 @@ export const SET_OPTIONS = 'set-options';
 export const OPEN_DOCUMENTS = 'open-documents';
 export const START_OPEN_DOCUMENTS = 'start-open-documents';
 export const END_OPEN_DOCUMENTS = 'end-open-documents';
+export const SAVE_DOCUMENT = 'save-document';
+export const START_SAVE_DOCUMENT = 'start-save-document';
+export const END_SAVE_DOCUMENT = 'end-save-document';

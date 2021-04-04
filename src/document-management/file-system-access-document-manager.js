@@ -1,8 +1,7 @@
 import JSZip from 'jszip';
+import { convertToLatest } from './document-converter';
 
-// TODO Convert v1 -> v2 -> v3
-
-export default class DocumentManager {
+export default class FileSystemAccessDocumentManager {
   async openDocuments() {
     const handles = await window.showOpenFilePicker({ multiple: true });
     return await Promise.all(handles.map(x => this.loadFileData(x)));
@@ -11,9 +10,10 @@ export default class DocumentManager {
   async loadFileData(handle) {
     const file = await handle.getFile();
     const blob = await file.slice();
-    const zip = await JSZip.loadAsync(blob);
+    const loadedZip = await JSZip.loadAsync(blob);
+    const convertedZip = await convertToLatest(loadedZip);
     const filePromises = [];
-    zip.forEach((relativePath, file) => {
+    convertedZip.forEach((relativePath, file) => {
       filePromises.push({ relativePath, file });
     });
     const resolvedFiles = await Promise.all(filePromises.map(async p => {
@@ -28,5 +28,18 @@ export default class DocumentManager {
       work: JSON.parse(resolvedFiles.find(f => f.name === 'anavis.json').content),
       files: Object.fromEntries(resolvedFiles.filter(f => f.name !== 'anavis.json').map(f => [f.name, f.content]))
     };
+  }
+
+  async saveDocument(doc) {
+    const zip = new JSZip();
+    zip.file('anavis.json', JSON.stringify(doc.work));
+    Object.entries(doc.files).forEach(([name, content]) => {
+      zip.file(name, content);
+    });
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const writable = await doc.handle.createWritable();
+    await writable.write(blob);
+    await writable.close();
   }
 }

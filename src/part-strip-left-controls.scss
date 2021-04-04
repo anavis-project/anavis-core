@@ -1,0 +1,27 @@
+@import './variables.scss';
+
+$iconColor: #0a64a4;
+
+.PartStripLeftControls {
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+#{$mouseOverWork} {
+  .PartStripLeftControls {
+    opacity: 1;
+    transition: all 0.1s;
+  }
+}
+
+.PartStripLeftControls-saveIcon {
+  color: desaturate($iconColor, 10%);
+  opacity: 0.5;
+  transition: all 0.5s;
+
+  &:hover {
+    color: $iconColor;
+    opacity: 1;
+    transition: all 0.1s;
+  }
+}

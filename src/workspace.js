@@ -207,7 +207,7 @@ export default function Workspace({ documents, selection, mouseInfo, workspaceIn
       onMouseUp={handleMouseLeaveOrUp}
       >
       <div className="Workspace-layer Workspace-layer--works">
-        {works.map(work => <Work key={work.id} work={work} options={options} />)}
+        {documents.map(doc => <Work key={doc.work.id} doc={doc} options={options} dispatch={dispatch} />)}
         <button onClick={handleOpenDocumentClick}>Open Document</button>
       </div>
       <div className="Workspace-layer Workspace-layer--adorners">

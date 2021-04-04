@@ -2,13 +2,13 @@ import './index.scss';
 import Anavis from './anavis';
 import ReactDOM from 'react-dom';
 import React, { useState } from 'react';
-import DocumentManager from './document-manager';
+import FileSystemAccessDocumentManager from './document-management/file-system-access-document-manager';
 
 const defaultOptions = {
   partHeight: 50,
   workHorizontalMargin: 50,
   workVerticalMargin: 50,
-  documentManager: new DocumentManager()
+  documentManager: new FileSystemAccessDocumentManager()
 };
 
 function Index() {
