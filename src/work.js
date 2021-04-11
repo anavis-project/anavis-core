@@ -1,10 +1,12 @@
 import './work.scss';
 import React from 'react';
 import PartStrip from './part-strip';
+import DocumentHeader from './document-header';
 import PartStripTopControls from './part-strip-top-controls';
+import PartStripLeftControls from './part-strip-left-controls';
 import PartStripBottomControls from './part-strip-bottom-controls';
 
-export default function Work({ work, options }) {
+export default function Work({ doc, options, dispatch }) {
   return (
     <div
       className="Work"
@@ -13,11 +15,16 @@ export default function Work({ work, options }) {
         gridTemplateRows: `${options.workVerticalMargin}px 1fr ${options.workVerticalMargin}px`,
         gridTemplateColumns: `${options.workHorizontalMargin}px 1fr ${options.workHorizontalMargin}px`
       }}>
-      <div className="Work-left">Links</div>
+      <div className="Work-topCenter">
+        <DocumentHeader doc={doc} dispatch={dispatch} />
+      </div>
+      <div className="Work-left">
+        <PartStripLeftControls doc={doc} dispatch={dispatch} />
+      </div>
       <div className="Work-center">
-        <PartStripTopControls work={work} />
-        <PartStrip work={work} partHeight={options.partHeight} />
-        <PartStripBottomControls work={work} />
+        <PartStripTopControls doc={doc} />
+        <PartStrip doc={doc} partHeight={options.partHeight} />
+        <PartStripBottomControls doc={doc} />
       </div>
       <div className="Work-right">Rechts</div>
     </div>

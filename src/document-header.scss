@@ -1,0 +1,7 @@
+@import './variables.scss';
+
+.DocumentHeader {
+  font-size: $documentHeaderFontSize;
+  font-style: italic;
+  color: $documentHeaderColor;
+}

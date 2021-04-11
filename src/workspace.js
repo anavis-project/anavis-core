@@ -8,7 +8,7 @@ import { getContrastColor } from './ui-helper';
 import useDimensions from 'react-cool-dimensions';
 import PartSelectionAdorner from './part-selection-adorner';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
-import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SPLIT_PART } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SPLIT_PART, OPEN_DOCUMENTS } from './actions';
 
 function findPossibleAction(event) {
   const element = findupAttribute(event.target, 'data-possible-action') || null;
@@ -17,7 +17,7 @@ function findPossibleAction(event) {
     case MERGE_PARTS:
       return {
         action: MERGE_PARTS,
-        workId: element.getAttribute('data-work-id'),
+        docId: element.getAttribute('data-doc-id'),
         leftPartId: element.getAttribute('data-left-part-id'),
         rightPartId: element.getAttribute('data-right-part-id'),
         leftPartIndex: Number(element.getAttribute('data-left-part-index')),
@@ -26,7 +26,7 @@ function findPossibleAction(event) {
     case RESIZE_PARTS:
       return {
         action: RESIZE_PARTS,
-        workId: element.getAttribute('data-work-id'),
+        docId: element.getAttribute('data-doc-id'),
         leftPartId: element.getAttribute('data-left-part-id'),
         rightPartId: element.getAttribute('data-right-part-id'),
         leftPartIndex: Number(element.getAttribute('data-left-part-index')),
@@ -35,14 +35,14 @@ function findPossibleAction(event) {
     case SPLIT_PART:
       return {
         action: SPLIT_PART,
-        workId: element.getAttribute('data-work-id'),
+        docId: element.getAttribute('data-doc-id'),
         partId: element.getAttribute('data-part-id'),
         partIndex: Number(element.getAttribute('data-part-index'))
       };
     case SELECT_PART:
       return {
         action: SELECT_PART,
-        workId: element.getAttribute('data-parent-work-id'),
+        docId: element.getAttribute('data-parent-doc-id'),
         partId: element.getAttribute('data-part-id')
       };
     case DESELECT_ALL:
@@ -54,7 +54,7 @@ function findPossibleAction(event) {
   }
 }
 
-export default function Workspace({ works, selection, mouseInfo, workspaceInfo, options, dispatch }) {
+export default function Workspace({ documents, selection, mouseInfo, workspaceInfo, options, dispatch }) {
   const { ref: workspaceRef, width: workspaceWidth } = useDimensions({ useBorderBoxSize: true });
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       case MERGE_PARTS:
         dispatch({
           type: MERGE_PARTS,
-          workId: mouseInfo.possibleAction.workId,
+          docId: mouseInfo.possibleAction.docId,
           leftPartId: mouseInfo.possibleAction.leftPartId,
           rightPartId: mouseInfo.possibleAction.rightPartId,
           leftPartIndex: mouseInfo.possibleAction.leftPartIndex,
@@ -117,7 +117,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       case RESIZE_PARTS:
         dispatch({
           type: RESIZE_PARTS,
-          workId: mouseInfo.possibleAction.workId,
+          docId: mouseInfo.possibleAction.docId,
           leftPartId: mouseInfo.possibleAction.leftPartId,
           rightPartId: mouseInfo.possibleAction.rightPartId,
           leftPartIndex: mouseInfo.possibleAction.leftPartIndex,
@@ -127,7 +127,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       case SPLIT_PART:
         dispatch({
           type: SPLIT_PART,
-          workId: mouseInfo.possibleAction.workId,
+          docId: mouseInfo.possibleAction.docId,
           partId: mouseInfo.possibleAction.partId,
           partIndex: mouseInfo.possibleAction.partIndex,
           workspaceX: mouseInfo.possibleAction.workspaceX,
@@ -137,7 +137,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       case SELECT_PART:
         dispatch({
           type: SELECT_PART,
-          workId: mouseInfo.possibleAction.workId,
+          docId: mouseInfo.possibleAction.docId,
           partId: mouseInfo.possibleAction.partId,
           ctrlKey: event.ctrlKey,
           shiftKey: event.shiftKey
@@ -156,7 +156,7 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
 
   const selectionRects = [];
   if (selection.chunks.length) {
-    const workElement = workspaceRef.current.querySelector(`[data-role="part-strip"][data-work-id="${selection.workId}"]`);
+    const workElement = workspaceRef.current.querySelector(`[data-role="part-strip"][data-doc-id="${selection.docId}"]`);
     const workTop = workElement.offsetTop;
     const workLeft = workElement.offsetLeft;
     const workHeight = workElement.offsetHeight;
@@ -174,11 +174,10 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
 
   let splitIndicator = null;
   if (mouseInfo.possibleAction?.action === SPLIT_PART) {
-    const work = works.find(w => w.id === mouseInfo.possibleAction.workId);
-    const part = work.parts[mouseInfo.possibleAction.partIndex];
-    const workElement = workspaceRef.current.querySelector(`[data-role="part-strip"][data-work-id="${mouseInfo.possibleAction.workId}"]`);
+    const doc = documents.find(d => d.id === mouseInfo.possibleAction.docId);
+    const part = doc.work.parts[mouseInfo.possibleAction.partIndex];
+    const workElement = workspaceRef.current.querySelector(`[data-role="part-strip"][data-doc-id="${mouseInfo.possibleAction.docId}"]`);
     const workTop = workElement.offsetTop;
-    // const workLeft = workElement.offsetLeft;
     const workHeight = workElement.offsetHeight;
     splitIndicator = {
       left: mouseInfo.possibleAction.workspaceX,
@@ -187,6 +186,12 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       color: getContrastColor(part.color, 0.6)
     };
   }
+
+  const handleOpenDocumentClick = () => {
+    dispatch({
+      type: OPEN_DOCUMENTS
+    });
+  };
 
   return (
     <div
@@ -200,7 +205,8 @@ export default function Workspace({ works, selection, mouseInfo, workspaceInfo, 
       onMouseUp={handleMouseLeaveOrUp}
       >
       <div className="Workspace-layer Workspace-layer--works">
-        {works.map(work => <Work key={work.id} work={work} options={options} />)}
+        {documents.map(doc => <Work key={doc.id} doc={doc} options={options} dispatch={dispatch} />)}
+        <button onClick={handleOpenDocumentClick}>Open Document</button>
       </div>
       <div className="Workspace-layer Workspace-layer--adorners">
         {selectionRects.map((rect, index) => <PartSelectionAdorner key={index} {...rect} />)}

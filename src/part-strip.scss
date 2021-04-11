@@ -1,3 +1,5 @@
+@import './variables.scss';
+
 .PartStrip {}
 
 .PartStrip-parts {
@@ -19,6 +21,7 @@
 
 .PartStrip-partName {
   width: 100%;
+  font-size: $partNameFontSize;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;

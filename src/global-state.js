@@ -1,9 +1,21 @@
 import { v4 } from 'uuid';
-import testDoc01 from './docs/01.json';
-import testDoc02 from './docs/02.json';
-import testDoc03 from './docs/03.json';
 import { px2Avu, MIN_PART_LENGTH_IN_AVUS } from './avu-helper';
-import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SET_OPTIONS, SPLIT_PART } from './actions';
+import {
+  MERGE_PARTS,
+  RESIZE_PARTS,
+  SELECT_PART,
+  DESELECT_ALL,
+  SET_MOUSE_INFO,
+  SET_WORKSPACE_INFO,
+  SET_OPTIONS,
+  SPLIT_PART,
+  OPEN_DOCUMENTS,
+  START_OPEN_DOCUMENTS,
+  END_OPEN_DOCUMENTS,
+  SAVE_DOCUMENT,
+  START_SAVE_DOCUMENT,
+  END_SAVE_DOCUMENT
+} from './actions';
 
 export const initialState = {
   selection: createEmptySelection(),
@@ -22,25 +34,26 @@ export const initialState = {
   options: {
     partHeight: 50,
     workHorizontalMargin: 50,
-    workVerticalMargin: 50
+    workVerticalMargin: 50,
+    documentManager: null
   },
-  works: [testDoc01, testDoc02, testDoc03]
+  documents: []
 };
 
 function createEmptySelection() {
   return {
-    workId: null,
+    docId: null,
     partIds: [],
     partIndices: [],
     chunks: []
   };
 }
 
-function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, shiftKey }) {
-  const work = works.find(w => w.id === workId);
+function createNewSelection({ docs, currentSelection, docId, partId, ctrlKey, shiftKey }) {
+  const doc = docs.find(d => d.id === docId);
 
-  // If the currently selected parts come from the same work, we keep them, otherwise, we start with an empty list:
-  const alreadySelectedPartIds = (currentSelection.workId === workId) ? currentSelection.partIds : [];
+  // If the currently selected parts come from the same doc, we keep them, otherwise, we start with an empty list:
+  const alreadySelectedPartIds = (currentSelection.docId === docId) ? currentSelection.partIds : [];
   const isSelected = alreadySelectedPartIds.includes(partId);
   const isOneOfMultiple = isSelected && alreadySelectedPartIds.length > 1;
   const isAddOrSubtract = ctrlKey;
@@ -51,7 +64,7 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   } else if (isOneOfMultiple) {
     newSelectedPartIds = [partId];
   } else if (isMerge) {
-    newSelectedPartIds = Array.from(work.parts.reduce((obj, part) => {
+    newSelectedPartIds = Array.from(doc.work.parts.reduce((obj, part) => {
       if (alreadySelectedPartIds.includes(part.id)) {
         obj.chunkProcessed = true;
         obj.ids.add(part.id);
@@ -66,9 +79,9 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   } else {
     newSelectedPartIds = isSelected ? [] : [partId];
   }
-  const newSelectedWorkId = newSelectedPartIds.length ? workId : null;
+  const newSelecteddocId = newSelectedPartIds.length ? docId : null;
 
-  const partIndices = work.parts.reduce((indices, part, index) => {
+  const partIndices = doc.work.parts.reduce((indices, part, index) => {
     if (newSelectedPartIds.includes(part.id)) {
       indices.push(index);
     }
@@ -87,8 +100,8 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   }
 
   let currentAvu = 0;
-  for (let i = 0; i < work.parts.length; i += 1) {
-    const part = work.parts[i];
+  for (let i = 0; i < doc.work.parts.length; i += 1) {
+    const part = doc.work.parts[i];
     const startAvu = currentAvu;
     const endAvu = startAvu + part.length;
 
@@ -107,7 +120,7 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   }
 
   return {
-    workId: newSelectedWorkId,
+    docId: newSelecteddocId,
     partIds: newSelectedPartIds,
     partIndices: partIndices,
     chunks: chunks
@@ -185,13 +198,13 @@ function modifyCurrentActionOnMousePositionChange(currentAction, mouseInfo, work
   }
 }
 
-function modifyWorksOnMousePositionChange(currentAction, works) {
+function modifyDocumentsOnMousePositionChange(currentAction, documents) {
   if (currentAction.type === RESIZE_PARTS) {
-    const workId = currentAction.workId;
-    return works.map(work => {
-      if (work.id === workId) {
-        const leftPart = work.parts[currentAction.leftPartIndex];
-        const rightPart = work.parts[currentAction.rightPartIndex];
+    const docId = currentAction.docId;
+    return documents.map(doc => {
+      if (doc.id === docId) {
+        const leftPart = doc.work.parts[currentAction.leftPartIndex];
+        const rightPart = doc.work.parts[currentAction.rightPartIndex];
         const offsetInAvus = currentAction.offsetInAvus;
         let newLeftPartLength;
         let newRightPartLength;
@@ -209,43 +222,47 @@ function modifyWorksOnMousePositionChange(currentAction, works) {
         }
 
         return (newLeftPartLength !== leftPart.length) ? {
-          ...work,
-          parts: work.parts.map(part => {
-            if (part.id === leftPart.id) {
-              return {
-                ...part,
-                length: newLeftPartLength
-              };
-            } else if (part.id === rightPart.id) {
-              return {
-                ...part,
-                length: newRightPartLength
-              };
-            } else {
-              return part;
-            }
-          })
-        } : work;
+          ...doc,
+          work: {
+            ...doc.work,
+            parts: doc.work.parts.map(part => {
+              if (part.id === leftPart.id) {
+                return {
+                  ...part,
+                  length: newLeftPartLength
+                };
+              } else if (part.id === rightPart.id) {
+                return {
+                  ...part,
+                  length: newRightPartLength
+                };
+              } else {
+                return part;
+              }
+            })
+          }
+        } : doc;
       } else {
-        return work;
+        return doc;
       }
     });
   } else {
-    return works;
+    return documents;
   }
 }
 
 export function reducer(state, action) {
-  const actionWork = action.workId ? state.works.find(work => work.id === action.workId) : null;
+  const actionDocument = action.docId ? state.documents.find(doc => doc.id === action.docId) : undefined;
+  const actionWork = actionDocument?.work;
 
   switch (action.type) {
     case MERGE_PARTS:
       return {
         ...state,
-        works: state.works.map(work => {
-          return work.id === action.workId
-            ? mergePartsInWork({ work, leftPartIndex: action.leftPartIndex, rightPartIndex: action.rightPartIndex })
-            : work
+        documents: state.documents.map(doc => {
+          return doc === actionDocument
+            ? { ...doc, work: mergePartsInWork({ work: doc.work, leftPartIndex: action.leftPartIndex, rightPartIndex: action.rightPartIndex })}
+            : doc
         }),
         selection: createEmptySelection()
       };
@@ -256,7 +273,7 @@ export function reducer(state, action) {
           ...state.mouseInfo,
           currentAction: {
             type: RESIZE_PARTS,
-            workId: action.workId,
+            docId: action.docId,
             leftPartId: action.leftPartId,
             rightPartId: action.rightPartId,
             leftPartIndex: action.leftPartIndex,
@@ -272,10 +289,10 @@ export function reducer(state, action) {
     case SPLIT_PART:
       return {
         ...state,
-        works: state.works.map(work => {
-          return work.id === action.workId
-            ? splitPartInWork({ work, partIndex: action.partIndex, offsetInAvus: action.offsetInAvus })
-            : work
+        documents: state.documents.map(doc => {
+          return doc === actionDocument
+            ? { ...doc, work: splitPartInWork({ work: doc.work, partIndex: action.partIndex, offsetInAvus: action.offsetInAvus }) }
+            : doc
         }),
         selection: createEmptySelection()
       };
@@ -283,9 +300,9 @@ export function reducer(state, action) {
       return {
         ...state,
         selection: createNewSelection({
-          works: state.works,
+          works: state.documents,
           currentSelection: state.selection,
-          workId: action.workId,
+          docId: action.docId,
           partId: action.partId,
           ctrlKey: action.ctrlKey,
           shiftKey: action.shiftKey,
@@ -295,7 +312,7 @@ export function reducer(state, action) {
       return {
         ...state,
         selection: {
-          workId: null,
+          docId: null,
           partIds: [],
           partIndices: [],
           chunks: []
@@ -304,10 +321,10 @@ export function reducer(state, action) {
     case SET_MOUSE_INFO:
       const possibleAction = action.info.possibleAction ? modifyPossibleActionOnMousePositionChange(action.info.possibleAction, action.info, state.workspaceInfo, state.options) : null;
       const currentAction = action.info.currentAction ? modifyCurrentActionOnMousePositionChange(action.info.currentAction, action.info, state.workspaceInfo) : null;
-      const works = currentAction ? modifyWorksOnMousePositionChange(currentAction, state.works) : state.works;
+      const documents = currentAction ? modifyDocumentsOnMousePositionChange(currentAction, state.documents) : state.documents;
       return {
         ...state,
-        works: works,
+        documents: documents,
         mouseInfo: {
           ...action.info,
           possibleAction: possibleAction,
@@ -327,7 +344,42 @@ export function reducer(state, action) {
           ...action.options
         }
       }
+    case START_OPEN_DOCUMENTS:
+      return {
+        ...state
+      }
+    case END_OPEN_DOCUMENTS:
+      return {
+        ...state,
+        documents: [
+          ...state.documents,
+          ...action.documents
+        ]
+      }
+    case START_SAVE_DOCUMENT:
+      return {
+        ...state
+      }
+    case END_SAVE_DOCUMENT:
+      return {
+        ...state
+      }
     default:
       throw new Error(`Action type ${action.type} is not implemented!`);
+  }
+}
+
+export const asyncActionHandlers = {
+  [OPEN_DOCUMENTS]: ({ dispatch, getState }) => async (action) => {
+    dispatch({ type: START_OPEN_DOCUMENTS });
+    const state = getState();
+    const documents = await state.options.documentManager.openDocuments();
+    dispatch({ type: END_OPEN_DOCUMENTS, documents: documents });
+  },
+  [SAVE_DOCUMENT]: ({ dispatch, getState }) => async (action) => {
+    dispatch({ type: START_SAVE_DOCUMENT, doc: action.doc });
+    const state = getState();
+    await state.options.documentManager.saveDocument(action.doc);
+    dispatch({ type: END_SAVE_DOCUMENT, doc: action.doc });
   }
 }
