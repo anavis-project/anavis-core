@@ -7,14 +7,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const BUTTON_WIDTH = 18;
 
-export default memo(function PartStripBottomControls({ work }) {
+export default memo(function PartStripBottomControls({ doc }) {
   return (
     <div className="PartStripBottomControls">
-      <PartBorderControls work={work} width={BUTTON_WIDTH} height={BUTTON_WIDTH}>
+      <PartBorderControls doc={doc} width={BUTTON_WIDTH} height={BUTTON_WIDTH}>
         {({ leftPart, rightPart, leftIndex, rightIndex }) => (
           <div
             className="PartStripBottomControls-iconContainer"
-            data-work-id={work.id}
+            data-doc-id={doc.id}
             data-left-part-id={leftPart.id}
             data-right-part-id={rightPart.id}
             data-left-part-index={leftIndex}

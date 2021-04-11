@@ -1,4 +1,5 @@
 import JSZip from 'jszip';
+import { v4 } from 'uuid';
 import { convertToLatest } from './document-converter';
 
 export default class FileSystemAccessDocumentManager {
@@ -23,6 +24,7 @@ export default class FileSystemAccessDocumentManager {
       };
     }));
     return {
+      id: v4(),
       name: handle.name,
       handle: handle,
       work: JSON.parse(resolvedFiles.find(f => f.name === 'anavis.json').content),

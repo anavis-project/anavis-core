@@ -3,21 +3,21 @@ import React, { memo } from 'react';
 import { SELECT_PART } from './actions';
 import { getContrastColor } from './ui-helper';
 
-export default memo(function PartStrip({ work, partHeight }) {
+export default memo(function PartStrip({ doc, partHeight }) {
   return (
     <div className="PartStrip"
       data-role="part-strip"
-      data-work-id={work.id}
+      data-doc-id={doc.id}
       >
       <div
         className="PartStrip-parts"
-        style={{ height: partHeight, gridTemplateColumns: work.parts.map(part => `${part.length}fr`).join(' ') }}
+        style={{ height: partHeight, gridTemplateColumns: doc.work.parts.map(part => `${part.length}fr`).join(' ') }}
         >
-        {work.parts.map((part, index) => (
+        {doc.work.parts.map((part, index) => (
           <div
             className="PartStrip-partOuter"
             key={part.id}
-            data-parent-work-id={work.id}
+            data-parent-doc-id={doc.id}
             data-part-id={part.id}
             data-possible-action={SELECT_PART}
             style={{ gridRow: 1, gridColumn: index + 1, backgroundColor: part.color, color: getContrastColor(part.color) }}

@@ -2,14 +2,14 @@ import React, { memo } from 'react';
 import './part-border-controls.scss';
 import { SPLIT_PART } from './actions';
 
-export default memo(function PartBorderControls({ work, width, height, children }) {
+export default memo(function PartBorderControls({ doc, width, height, children }) {
   return (
     <div
       className="PartBorderControls"
-      data-work-id={work.id}
-      style={{ height: height, gridTemplateColumns: work.parts.map(part => `${part.length}fr`).join(' ') }}
+      data-doc-id={doc.id}
+      style={{ height: height, gridTemplateColumns: doc.work.parts.map(part => `${part.length}fr`).join(' ') }}
       >
-      {work.parts.map((part, index) => index !== work.parts.length - 1 && (
+      {doc.work.parts.map((part, index) => index !== doc.work.parts.length - 1 && (
         <div
           className="PartBorderControls-control"
           key={part.id}
@@ -19,16 +19,16 @@ export default memo(function PartBorderControls({ work, width, height, children 
             {children({
               leftIndex: index,
               rightIndex: index + 1,
-              leftPart: work.parts[index],
-              rightPart: work.parts[index + 1]
+              leftPart: doc.work.parts[index],
+              rightPart: doc.work.parts[index + 1]
             })}
           </div>
         </div>
       ))}
-      {work.parts.map((part, index) => (
+      {doc.work.parts.map((part, index) => (
         <div
           key={part.id}
-          data-work-id={work.id}
+          data-doc-id={doc.id}
           data-part-id={part.id}
           data-part-index={index}
           data-possible-action={SPLIT_PART}

@@ -1,7 +1,4 @@
 import { v4 } from 'uuid';
-import testDoc01 from './docs/01.json';
-import testDoc02 from './docs/02.json';
-import testDoc03 from './docs/03.json';
 import { px2Avu, MIN_PART_LENGTH_IN_AVUS } from './avu-helper';
 import {
   MERGE_PARTS,
@@ -40,32 +37,23 @@ export const initialState = {
     workVerticalMargin: 50,
     documentManager: null
   },
-  documents: [
-    testDoc01,
-    testDoc02,
-    testDoc03
-  ].map(work => ({
-    name: '',
-    handle: null,
-    work: work,
-    files: []
-  }))
+  documents: []
 };
 
 function createEmptySelection() {
   return {
-    workId: null,
+    docId: null,
     partIds: [],
     partIndices: [],
     chunks: []
   };
 }
 
-function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, shiftKey }) {
-  const work = works.find(w => w.id === workId);
+function createNewSelection({ docs, currentSelection, docId, partId, ctrlKey, shiftKey }) {
+  const doc = docs.find(d => d.id === docId);
 
-  // If the currently selected parts come from the same work, we keep them, otherwise, we start with an empty list:
-  const alreadySelectedPartIds = (currentSelection.workId === workId) ? currentSelection.partIds : [];
+  // If the currently selected parts come from the same doc, we keep them, otherwise, we start with an empty list:
+  const alreadySelectedPartIds = (currentSelection.docId === docId) ? currentSelection.partIds : [];
   const isSelected = alreadySelectedPartIds.includes(partId);
   const isOneOfMultiple = isSelected && alreadySelectedPartIds.length > 1;
   const isAddOrSubtract = ctrlKey;
@@ -76,7 +64,7 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   } else if (isOneOfMultiple) {
     newSelectedPartIds = [partId];
   } else if (isMerge) {
-    newSelectedPartIds = Array.from(work.parts.reduce((obj, part) => {
+    newSelectedPartIds = Array.from(doc.work.parts.reduce((obj, part) => {
       if (alreadySelectedPartIds.includes(part.id)) {
         obj.chunkProcessed = true;
         obj.ids.add(part.id);
@@ -91,9 +79,9 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   } else {
     newSelectedPartIds = isSelected ? [] : [partId];
   }
-  const newSelectedWorkId = newSelectedPartIds.length ? workId : null;
+  const newSelecteddocId = newSelectedPartIds.length ? docId : null;
 
-  const partIndices = work.parts.reduce((indices, part, index) => {
+  const partIndices = doc.work.parts.reduce((indices, part, index) => {
     if (newSelectedPartIds.includes(part.id)) {
       indices.push(index);
     }
@@ -112,8 +100,8 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   }
 
   let currentAvu = 0;
-  for (let i = 0; i < work.parts.length; i += 1) {
-    const part = work.parts[i];
+  for (let i = 0; i < doc.work.parts.length; i += 1) {
+    const part = doc.work.parts[i];
     const startAvu = currentAvu;
     const endAvu = startAvu + part.length;
 
@@ -132,7 +120,7 @@ function createNewSelection({ works, currentSelection, workId, partId, ctrlKey, 
   }
 
   return {
-    workId: newSelectedWorkId,
+    docId: newSelecteddocId,
     partIds: newSelectedPartIds,
     partIndices: partIndices,
     chunks: chunks
@@ -212,9 +200,9 @@ function modifyCurrentActionOnMousePositionChange(currentAction, mouseInfo, work
 
 function modifyDocumentsOnMousePositionChange(currentAction, documents) {
   if (currentAction.type === RESIZE_PARTS) {
-    const workId = currentAction.workId;
+    const docId = currentAction.docId;
     return documents.map(doc => {
-      if (doc.work.id === workId) {
+      if (doc.id === docId) {
         const leftPart = doc.work.parts[currentAction.leftPartIndex];
         const rightPart = doc.work.parts[currentAction.rightPartIndex];
         const offsetInAvus = currentAction.offsetInAvus;
@@ -264,7 +252,7 @@ function modifyDocumentsOnMousePositionChange(currentAction, documents) {
 }
 
 export function reducer(state, action) {
-  const actionDocument = action.workId ? state.documents.find(doc => doc.work.id === action.workId) : undefined;
+  const actionDocument = action.docId ? state.documents.find(doc => doc.id === action.docId) : undefined;
   const actionWork = actionDocument?.work;
 
   switch (action.type) {
@@ -285,7 +273,7 @@ export function reducer(state, action) {
           ...state.mouseInfo,
           currentAction: {
             type: RESIZE_PARTS,
-            workId: action.workId,
+            docId: action.docId,
             leftPartId: action.leftPartId,
             rightPartId: action.rightPartId,
             leftPartIndex: action.leftPartIndex,
@@ -312,9 +300,9 @@ export function reducer(state, action) {
       return {
         ...state,
         selection: createNewSelection({
-          works: state.documents.map(doc => doc.work),
+          works: state.documents,
           currentSelection: state.selection,
-          workId: action.workId,
+          docId: action.docId,
           partId: action.partId,
           ctrlKey: action.ctrlKey,
           shiftKey: action.shiftKey,
@@ -324,7 +312,7 @@ export function reducer(state, action) {
       return {
         ...state,
         selection: {
-          workId: null,
+          docId: null,
           partIds: [],
           partIndices: [],
           chunks: []

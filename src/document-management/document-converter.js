@@ -16,6 +16,9 @@ async function v2ToV3(zip) {
     return zip;
   }
 
+  doc.version = '3';
+  delete doc.id;
+
   const totalLength = doc.parts.reduce((len, part) => len + part.length, 0);
   const factor = MAX_AVUS / totalLength;
   let usedAvus = 0;

@@ -22,9 +22,9 @@ export default function Work({ doc, options, dispatch }) {
         <PartStripLeftControls doc={doc} dispatch={dispatch} />
       </div>
       <div className="Work-center">
-        <PartStripTopControls work={doc.work} />
-        <PartStrip work={doc.work} partHeight={options.partHeight} />
-        <PartStripBottomControls work={doc.work} />
+        <PartStripTopControls doc={doc} />
+        <PartStrip doc={doc} partHeight={options.partHeight} />
+        <PartStripBottomControls doc={doc} />
       </div>
       <div className="Work-right">Rechts</div>
     </div>
