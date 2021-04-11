@@ -300,7 +300,7 @@ export function reducer(state, action) {
       return {
         ...state,
         selection: createNewSelection({
-          works: state.documents,
+          docs: state.documents,
           currentSelection: state.selection,
           docId: action.docId,
           partId: action.partId,
