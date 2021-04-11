@@ -31,6 +31,12 @@ async function v2ToV3(zip) {
       part.length = MAX_AVUS - usedAvus;
     }
   }
+
+  doc.sounds = doc.sounds.filter(s => s.embedded).map(s => ({
+    type: 'embedded',
+    fileName: s.path
+  }));
+
   zip.file('anavis.json', JSON.stringify(doc));
   return zip;
 }

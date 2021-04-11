@@ -2,29 +2,6 @@
   display: grid;
 }
 
-.Work-topCenter {
-  grid-row: 1;
-  grid-column: 2;
-  display: block;
-  align-self: end;
-}
-
-.Work-left {
-  grid-row: 2;
-  grid-column: 1;
-  display: grid;
-  align-content: center;
-  justify-content: center;
-}
-
-.Work-center {
-  grid-row: 2;
-  grid-column: 2;
-  display: grid;
-}
-
-.Work-right {
-  grid-row: 2;
-  grid-column: 3;
+.Work-cell {
   display: grid;
 }

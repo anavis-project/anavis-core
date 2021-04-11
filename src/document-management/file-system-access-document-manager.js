@@ -20,7 +20,7 @@ export default class FileSystemAccessDocumentManager {
     const resolvedFiles = await Promise.all(filePromises.map(async p => {
       return {
         name: p.relativePath,
-        content: await p.file.async(p.relativePath === 'anavis.json' ? 'text' : 'arraybuffer')
+        content: await p.file.async(p.relativePath === 'anavis.json' ? 'text' : 'blob')
       };
     }));
     return {

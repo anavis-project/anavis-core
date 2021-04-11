@@ -22,10 +22,12 @@
     "hare-niemeyer": "~2.0.0",
     "install": "~0.13.0",
     "jszip": "~3.6.0",
+    "memoizee": "~0.4.15",
     "node-sass": "~4.14.1",
     "react": "~16.13.1",
     "react-cool-dimensions": "~1.1.8",
     "react-dom": "~16.13.1",
+    "react-player": "~2.9.0",
     "react-scripts": "~3.4.3",
     "use-reducer-async": "~2.0.1",
     "uuid": "~8.3.2"
