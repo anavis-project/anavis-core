@@ -1,22 +1,13 @@
 import './work.scss';
-import memoize from 'memoizee';
+import React from 'react';
+import Sound from './sound';
 import PartStrip from './part-strip';
-import React, { useRef } from 'react';
-import ReactPlayer from 'react-player';
 import DocumentHeader from './document-header';
 import PartStripTopControls from './part-strip-top-controls';
 import PartStripLeftControls from './part-strip-left-controls';
 import PartStripBottomControls from './part-strip-bottom-controls';
 
-const getEmbeddedSoundUrl = memoize((doc, fileName) => {
-  return URL.createObjectURL(doc.files[fileName]);
-}, {
-  normalizer: ([doc, fileName]) => `${doc.id}|${fileName}`
-});
-
 export default function Work({ doc, options, dispatch }) {
-  const playerRef = useRef();
-  const soundUrl = doc.work.sounds.length ? getEmbeddedSoundUrl(doc, doc.work.sounds[0].fileName) : null;
   return (
     <div
       className="Work"
@@ -37,16 +28,9 @@ export default function Work({ doc, options, dispatch }) {
         <PartStripBottomControls doc={doc} />
       </div>
       <div style={{ gridRow: 4, gridColumn: 2 }} className="Work-cell">
-        <ReactPlayer
-          ref={playerRef}
-          className="Video-mainPlayerInner"
-          url={soundUrl}
-          width="100%"
-          height="100%"
-          controls
-          progressInterval={100}
-          playing={true}
-          />
+        {doc.work.sounds.map((sound, index) => (
+          <Sound key={index} doc={doc} sound={sound} />
+        ))}
       </div>
     </div>
   );
