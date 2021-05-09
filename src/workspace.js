@@ -8,7 +8,7 @@ import { getContrastColor } from './ui-helper';
 import useDimensions from 'react-cool-dimensions';
 import PartSelectionAdorner from './part-selection-adorner';
 import { getAvuFactorFromWorkspaceWidth, avu2Px } from './avu-helper';
-import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SPLIT_PART, OPEN_DOCUMENTS } from './actions';
+import { MERGE_PARTS, RESIZE_PARTS, SELECT_PART, DESELECT_ALL, SET_MOUSE_INFO, SET_WORKSPACE_INFO, SPLIT_PART, OPEN_DOCUMENTS, CREATE_DOCUMENT } from './actions';
 
 function findPossibleAction(event) {
   const element = findupAttribute(event.target, 'data-possible-action') || null;
@@ -187,6 +187,12 @@ export default function Workspace({ documents, selection, mouseInfo, workspaceIn
     };
   }
 
+  const handleCreateDocumentClick = () => {
+    dispatch({
+      type: CREATE_DOCUMENT
+    });
+  };
+
   const handleOpenDocumentClick = () => {
     dispatch({
       type: OPEN_DOCUMENTS
@@ -206,6 +212,7 @@ export default function Workspace({ documents, selection, mouseInfo, workspaceIn
       >
       <div className="Workspace-layer Workspace-layer--works">
         {documents.map(doc => <Work key={doc.id} doc={doc} options={options} dispatch={dispatch} />)}
+        <button onClick={handleCreateDocumentClick}>New Document</button>
         <button onClick={handleOpenDocumentClick}>Open Document</button>
       </div>
       <div className="Workspace-layer Workspace-layer--adorners">
