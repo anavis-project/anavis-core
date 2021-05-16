@@ -19,6 +19,8 @@ async function v2ToV3(zip) {
   doc.version = '3';
   delete doc.id;
 
+  delete doc.name;
+
   const totalLength = doc.parts.reduce((len, part) => len + part.length, 0);
   const factor = MAX_AVUS / totalLength;
   let usedAvus = 0;
@@ -31,6 +33,10 @@ async function v2ToV3(zip) {
       part.length = MAX_AVUS - usedAvus;
     }
   }
+
+  doc.annotations.forEach(annotation => {
+    delete annotation.type;
+  });
 
   doc.sounds = doc.sounds.filter(s => s.embedded).map(s => ({
     type: 'embedded',

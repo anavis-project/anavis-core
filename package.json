@@ -21,6 +21,7 @@
     "findup-attribute": "~1.0.0",
     "hare-niemeyer": "~2.0.0",
     "install": "~0.13.0",
+    "joi": "~17.4.0",
     "jszip": "~3.6.0",
     "node-sass": "~4.14.1",
     "react": "~16.13.1",

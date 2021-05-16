@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { px2Avu, MIN_PART_LENGTH_IN_AVUS, MAX_AVUS } from './avu-helper';
+import { px2Avu, MIN_PART_LENGTH_IN_AVUS } from './avu-helper';
 import {
   MERGE_PARTS,
   RESIZE_PARTS,
@@ -40,28 +40,6 @@ export const initialState = {
   },
   documents: []
 };
-
-function createNewDocument() {
-  return  {
-    id: v4(),
-    work: {
-      version: '3',
-      name: 'Unbekannt',
-      parts: [
-        {
-          id: v4(),
-          name: 'Unbenannt',
-          color: '#4582b4',
-          length: MAX_AVUS
-        }
-      ],
-      annotations: [],
-      sounds: []
-    },
-    files: {}
-  }
-
-}
 
 function createEmptySelection() {
   return {
@@ -370,7 +348,7 @@ export function reducer(state, action) {
     case CREATE_DOCUMENT:
       return {
         ...state,
-        documents: [...state.documents, createNewDocument()]
+        documents: [...state.documents, state.options.documentManager.createDocument()]
       }
     case START_OPEN_DOCUMENTS:
       return {

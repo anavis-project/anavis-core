@@ -1,6 +1,8 @@
 import JSZip from 'jszip';
 import { v4 } from 'uuid';
+import { MAX_AVUS } from '../avu-helper';
 import { convertToLatest } from './document-converter';
+import { validateV3Document } from './document-validation';
 
 export default class FileSystemAccessDocumentManager {
   async openDocuments() {
@@ -23,16 +25,19 @@ export default class FileSystemAccessDocumentManager {
         content: await p.file.async(p.relativePath === 'anavis.json' ? 'text' : 'blob')
       };
     }));
-    return {
+    const doc = {
       id: v4(),
       name: handle.name,
       handle: handle,
       work: JSON.parse(resolvedFiles.find(f => f.name === 'anavis.json').content),
       files: Object.fromEntries(resolvedFiles.filter(f => f.name !== 'anavis.json').map(f => [f.name, f.content]))
     };
+    validateV3Document(doc);
+    return doc;
   }
 
   async saveDocument(doc) {
+    validateV3Document(doc);
     const zip = new JSZip();
     zip.file('anavis.json', JSON.stringify(doc.work));
     Object.entries(doc.files).forEach(([name, content]) => {
@@ -43,5 +48,27 @@ export default class FileSystemAccessDocumentManager {
     const writable = await doc.handle.createWritable();
     await writable.write(blob);
     await writable.close();
+  }
+
+  createDocument() {
+    const doc = {
+      id: v4(),
+      work: {
+        version: '3',
+        parts: [
+          {
+            id: v4(),
+            name: 'Unbekannt',
+            color: '#4582b4',
+            length: MAX_AVUS
+          }
+        ],
+        annotations: [],
+        sounds: []
+      },
+      files: {}
+    };
+    validateV3Document(doc);
+    return doc;
   }
 }
