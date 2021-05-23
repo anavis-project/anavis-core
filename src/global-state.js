@@ -1,4 +1,6 @@
 import { v4 } from 'uuid';
+import produce from 'immer';
+import { readAsArrayBuffer } from 'promise-file-reader';
 import { px2Avu, MIN_PART_LENGTH_IN_AVUS } from './avu-helper';
 import {
   MERGE_PARTS,
@@ -15,7 +17,10 @@ import {
   END_OPEN_DOCUMENTS,
   SAVE_DOCUMENT,
   START_SAVE_DOCUMENT,
-  END_SAVE_DOCUMENT
+  END_SAVE_DOCUMENT,
+  SET_MEDIA_FILE,
+  START_SET_MEDIA_FILE,
+  END_SET_MEDIA_FILE
 } from './actions';
 
 export const initialState = {
@@ -370,6 +375,22 @@ export function reducer(state, action) {
       return {
         ...state
       }
+    case START_SET_MEDIA_FILE:
+      return {
+        ...state
+      };
+    case END_SET_MEDIA_FILE:
+      return produce(state, draft => {
+        const doc = draft.documents.find(doc => doc.id === action.docId);
+        doc.files = {
+          ...doc.files,
+          [action.name]: action.blob
+        };
+        doc.work.media = [{
+          type: 'embedded',
+          fileName: action.name
+        }];
+      });
     default:
       throw new Error(`Action type ${action.type} is not implemented!`);
   }
@@ -387,5 +408,13 @@ export const asyncActionHandlers = {
     const state = getState();
     await state.options.documentManager.saveDocument(action.doc);
     dispatch({ type: END_SAVE_DOCUMENT, doc: action.doc });
+  },
+  [SET_MEDIA_FILE]: ({ dispatch }) => async (action) => {
+    const docId = action.docId;
+    const name = action.file.name;
+    dispatch({ type: START_SET_MEDIA_FILE, docId, name });
+    const ab = await readAsArrayBuffer(action.file)
+    const blob = new Blob([ab], { type: action.file.type });
+    dispatch({ type: END_SET_MEDIA_FILE, docId, name, blob });
   }
 }

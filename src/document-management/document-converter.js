@@ -38,10 +38,12 @@ async function v2ToV3(zip) {
     delete annotation.type;
   });
 
-  doc.sounds = doc.sounds.filter(s => s.embedded).map(s => ({
+  doc.media = doc.sounds.filter(s => s.embedded).map(s => ({
     type: 'embedded',
     fileName: s.path
   }));
+
+  delete doc.sounds;
 
   zip.file('anavis.json', JSON.stringify(doc));
   return zip;

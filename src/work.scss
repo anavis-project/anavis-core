@@ -1,5 +1,14 @@
+@import './variables.scss';
+
 .Work {
   display: grid;
+  background-color: transparent;
+  border: 2px dashed transparent;
+}
+
+.Work.is-drop-target {
+  background-color: $green-1;
+  border-color: $green-3;
 }
 
 .Work-cell {

@@ -10,7 +10,7 @@ const playStates = {
   PAUSING: 'pausing'
 };
 
-export default function Sound({ doc, sound }) {
+export default function Media({ doc, sound }) {
   const playerRef = useRef();
   const [soundUrl, setSoundUrl] = useState(null);
   const [playState, setPlayState] = useState(playStates.INITIALIZING);
@@ -85,7 +85,7 @@ export default function Sound({ doc, sound }) {
         ref={playerRef}
         url={soundUrl}
         width="100%"
-        height="0%"
+        height="100%"
         volume={volume}
         progressInterval={100}
         playing={playState === playStates.PLAYING || playState === playStates.BUFFERING}

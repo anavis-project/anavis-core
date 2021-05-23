@@ -64,7 +64,7 @@ export default class FileSystemAccessDocumentManager {
           }
         ],
         annotations: [],
-        sounds: []
+        media: []
       },
       files: {}
     };

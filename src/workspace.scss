@@ -1,5 +1,7 @@
 .Workspace {
   position: relative;
+  overflow-y: auto;
+  height: 100%;
 
   &.u-select-part {
     cursor: pointer;

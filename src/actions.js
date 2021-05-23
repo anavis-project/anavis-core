@@ -13,3 +13,6 @@ export const END_OPEN_DOCUMENTS = 'end-open-documents';
 export const SAVE_DOCUMENT = 'save-document';
 export const START_SAVE_DOCUMENT = 'start-save-document';
 export const END_SAVE_DOCUMENT = 'end-save-document';
+export const SET_MEDIA_FILE = 'set-media-file';
+export const START_SET_MEDIA_FILE = 'start-set-media-file';
+export const END_SET_MEDIA_FILE = 'end-set-media-file';

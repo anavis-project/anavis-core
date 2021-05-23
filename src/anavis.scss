@@ -8,8 +8,7 @@
 }
 
 .Anavis-debugArea {
-  overflow: scroll;
-  display: grid;
+  overflow: auto;
   grid-row: 1;
   grid-column: 1;
   border: 1px solid gray;
@@ -18,7 +17,6 @@
 }
 
 .Anavis-workspaceArea {
-  display: grid;
   grid-row: 1;
   grid-column: 3;
   border: 1px solid gray;

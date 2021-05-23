@@ -15,7 +15,7 @@ const annotationSchema = Joi.object({
   values: Joi.array().items(Joi.string().allow(''))
 });
 
-const soundSchema = Joi.object({
+const mediaSchema = Joi.object({
   type: Joi.string().allow('embedded'),
   fileName: Joi.string()
 });
@@ -28,7 +28,7 @@ const v3Schema = Joi.object({
     version: Joi.any().allow('3'),
     parts: Joi.array().min(1).items(partSchema),
     annotations: Joi.array().items(annotationSchema),
-    sounds: Joi.array().items(soundSchema)
+    media: Joi.array().items(mediaSchema)
   },
   files: Joi.object().custom(value => {
     if (!value || typeof value !== 'object') {
